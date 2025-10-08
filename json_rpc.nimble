@@ -26,7 +26,7 @@ requires "nim >= 1.6.0",
          "chronicles",
          "websock >= 0.2.0 & < 0.3.0",
          "serialization >= 0.4.4",
-         "json_serialization >= 0.4.2",
+         "https://github.com/nitely/nim-json-serialization#10e431460b0c31e1de7288d4025ff592d1aa9635",
          "unittest2"
 
 let nimc = getEnv("NIMC", "nim") # Which nim compiler to use
