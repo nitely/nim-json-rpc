@@ -23,12 +23,17 @@ logScope:
   topics = "jsonrpc router"
 
 type
+  RpcFormat* {.pure.} = enum
+    Json
+    Cbor
+
   RpcProc* = proc(params: RequestParamsRx): Future[JsonString] {.async.}
     ## Procedure signature accepted as an RPC call by server - if the function
     ## has no return value, return `JsonString("null")`
 
   RpcRouter* = object
     procs*: Table[string, RpcProc]
+    format*: RpcFormat
 
 const
   # https://www.jsonrpc.org/specification#error_object

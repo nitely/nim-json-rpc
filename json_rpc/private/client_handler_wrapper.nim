@@ -12,7 +12,8 @@
 import
   macros,
   ./shared_wrapper,
-  ./jrpc_sys
+  ./jrpc_sys,
+  stew/base64
 
 func createRpcProc(procName, parameters, callBody: NimNode): NimNode =
   # parameters come as a tree
@@ -47,7 +48,10 @@ func setupConversion(reqParams, params, formatType: NimNode): NimNode =
 
   for parIdent, _, parType in paramsIter(params):
     result.add quote do:
-      `reqParams`.positional.add encode(`formatType`, `parIdent`).JsonString
+      when typeof(encode(`formatType`, `parIdent`)) is seq[byte]:
+        `reqParams`.positional.add encode(Base64, encode(`formatType`, `parIdent`)).JsonString
+      else:
+        `reqParams`.positional.add encode(`formatType`, `parIdent`).JsonString
 
 template maybeUnwrapClientResult*(client, meth, reqParams, returnType, formatType): auto =
   ## Don't decode e.g. JsonString, return as is

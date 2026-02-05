@@ -11,7 +11,7 @@
 
 import
   std/[macros, typetraits],
-  stew/[byteutils, objects],
+  stew/[byteutils, objects, base64],
   chronos/futures,
   json_serialization,
   json_serialization/std/[options],
@@ -224,7 +224,10 @@ template maybeWrapServerResult*(Format, resFut): auto =
     await resFut
   else:
     let res = await resFut
-    JsonString(encode(Format, res))
+    when typeof(encode(Format, res)) is seq[byte]:
+      JsonString(encode(Base64, encode(Format, res)))
+    else:
+      JsonString(encode(Format, res))
 
 func wrapServerHandler*(
     methName: string, params, procBody, procWrapper, formatType: NimNode
