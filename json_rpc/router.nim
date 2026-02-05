@@ -27,8 +27,13 @@ type
     ## Procedure signature accepted as an RPC call by server - if the function
     ## has no return value, return `JsonString("null")`
 
+  RpcFormat* {.pure.} = enum
+    Json
+    Cbor
+
   RpcRouter* = object
     procs*: Table[string, RpcProc]
+    format*: RpcFormat  # XXX RpcRouter[Format] ?
 
 const
   # https://www.jsonrpc.org/specification#error_object
@@ -79,11 +84,17 @@ func lookup(router: RpcRouter, req: RequestRx2): Opt[RpcProc] =
   else:
     ok(rpcProc)
 
-func wrapError*(code: int, msg: string): seq[byte] =
-  JrpcSys.withWriter(writer):
+template wrapErrorImpl(code: int, msg: string, formatType: untyped): untyped =
+  formatType.withWriter(writer):
     writer.writeValue(
       ResponseTx(kind: rkError, error: ResponseError(code: code, message: msg))
     )
+
+func wrapError*(code: int, msg: string, format: RpcFormat): seq[byte] =
+  wrapErrorImpl(code, msg, format)
+
+func wrapError*(code: int, msg: string): seq[byte] =
+  wrapError(code, msg, RpcFormat.Json)
 
 # ------------------------------------------------------------------------------
 # Public functions
@@ -130,8 +141,13 @@ proc route*(
   of rbkSingle:
     let response = await router.route(request.single)
     if request.single.id.isSome:
-      JrpcSys.withWriter(writer):
-        writer.writeValue(response)
+      case router.format
+      of RpcFormat.Json:
+        JrpcSys.withWriter(writer):
+          writer.writeValue(response)
+      of RpcFormat.Cbor:
+        CrpcSys.withWriter(writer):
+          writer.writeValue(response)
     else:
       default(seq[byte])
   of rbkMany:
@@ -143,15 +159,25 @@ proc route*(
 
     # If all requests are notifications, we should not make a response
     if request.many.anyIt(it.id.isSome()):
-      JrpcSys.withWriter(writer):
-        writer.writeArray:
-          for i, fut in responses.mpairs():
-            if request.many[i].id.isSome():
-              writer.writeValue(responses[i].value())
-            reset(fut) # Release memory eagerly in case response is big
+      case router.format
+      of RpcFormat.Json:
+        JrpcSys.withWriter(writer):
+          writer.writeArray:
+            for i, fut in responses.mpairs():
+              if request.many[i].id.isSome():
+                writer.writeValue(responses[i].value())
+              reset(fut) # Release memory eagerly in case response is big
+      of RpcFormat.Cbor:
+        CrpcSys.withWriter(writer):
+          writer.writeArray:
+            for i, fut in responses.mpairs():
+              if request.many[i].id.isSome():
+                writer.writeValue(responses[i].value())
+              reset(fut) # Release memory eagerly in case response is big
     else:
       default(seq[byte])
 
+# XXX format
 proc route*(
     router: RpcRouter, data: string | seq[byte]
 ): Future[string] {.async: (raises: []).} =
