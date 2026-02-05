@@ -47,7 +47,10 @@ func unpackArg(args: JsonString, argName: string, argType: type, Format: type Se
   ## This where input parameters are decoded from JSON into
   ## Nim data types
   try:
-    result = decode(Format, args.string, argType)
+    when PreferredOutputType(Format) is seq[byte]:
+      result = decode(Format, decode(Base64, string(args)[1 .. ^2]), argType)
+    else:
+      result = decode(Format, args.string, argType)
   except CatchableError as err:
     raise newException(RequestDecodeError,
       "Parameter [" & argName & "] of type '" &
@@ -225,7 +228,7 @@ template maybeWrapServerResult*(Format, resFut): auto =
   else:
     let res = await resFut
     when typeof(encode(Format, res)) is seq[byte]:
-      JsonString(encode(Base64, encode(Format, res)))
+      JsonString("\"" & encode(Base64, encode(Format, res)) & "\"")
     else:
       JsonString(encode(Format, res))
 
