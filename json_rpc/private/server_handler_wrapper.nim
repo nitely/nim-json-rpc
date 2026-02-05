@@ -11,7 +11,7 @@
 
 import
   std/[macros, typetraits],
-  stew/[byteutils, objects],
+  stew/[byteutils, objects, base64],
   chronos/futures,
   json_serialization,
   json_serialization/std/[options],
@@ -47,7 +47,10 @@ func unpackArg(args: JsonString, argName: string, argType: type, Format: type Se
   ## This where input parameters are decoded from JSON into
   ## Nim data types
   try:
-    result = decode(Format, args.string, argType)
+    when PreferredOutputType(Format) is seq[byte]:
+      result = decode(Format, decode(Base64, string(args)[1 .. ^2]), argType)
+    else:
+      result = decode(Format, args.string, argType)
   except CatchableError as err:
     raise newException(RequestDecodeError,
       "Parameter [" & argName & "] of type '" &
@@ -224,7 +227,10 @@ template maybeWrapServerResult*(Format, resFut): auto =
     await resFut
   else:
     let res = await resFut
-    JsonString(encode(Format, res))
+    when typeof(encode(Format, res)) is seq[byte]:
+      JsonString("\"" & encode(Base64, encode(Format, res)) & "\"")
+    else:
+      JsonString(encode(Format, res))
 
 func wrapServerHandler*(
     methName: string, params, procBody, procWrapper, formatType: NimNode

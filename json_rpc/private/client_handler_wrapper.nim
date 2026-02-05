@@ -12,7 +12,8 @@
 import
   macros,
   ./shared_wrapper,
-  ./jrpc_sys
+  ./jrpc_sys,
+  stew/base64
 
 func createRpcProc(procName, parameters, callBody: NimNode): NimNode =
   # parameters come as a tree
@@ -47,7 +48,10 @@ func setupConversion(reqParams, params, formatType: NimNode): NimNode =
 
   for parIdent, _, parType in paramsIter(params):
     result.add quote do:
-      `reqParams`.positional.add encode(`formatType`, `parIdent`).JsonString
+      when typeof(encode(`formatType`, `parIdent`)) is seq[byte]:
+        `reqParams`.positional.add JsonString("\"" & encode(Base64, encode(`formatType`, `parIdent`)) & "\"")
+      else:
+        `reqParams`.positional.add encode(`formatType`, `parIdent`).JsonString
 
 template maybeUnwrapClientResult*(client, meth, reqParams, returnType, formatType): auto =
   ## Don't decode e.g. JsonString, return as is
@@ -56,7 +60,10 @@ template maybeUnwrapClientResult*(client, meth, reqParams, returnType, formatTyp
   else:
     proc complete(f: auto): Future[returnType] {.async.} =
       let res = await f
-      decode(formatType, res.string, returnType)
+      when PreferredOutputType(formatType) is seq[byte]:
+        result = decode(formatType, decode(Base64, string(res)[1 .. ^2]), returnType)
+      else:
+        result = decode(formatType, res.string, returnType)
     let fut = client.call(meth, reqParams)
     complete(fut)
 
