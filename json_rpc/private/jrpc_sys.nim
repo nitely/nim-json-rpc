@@ -13,9 +13,10 @@ import
   std/hashes,
   results,
   json_serialization,
-  json_serialization/pkg/results as jsresults
+  json_serialization/pkg/results as jsresults,
+  ./crpc_sys
 
-export results, json_serialization, jsresults
+export results, json_serialization, jsresults, crpc_sys
 
 # This module implements JSON-RPC 2.0 Specification
 # https://www.jsonrpc.org/specification
@@ -157,6 +158,33 @@ ResponseTx.useDefaultWriterIn JrpcSys
 
 ResponseError.useDefaultSerializationIn JrpcSys
 
+# XXX disable distinct writer
+#createCborFlavor CrpcSys,
+#  automaticObjectSerialization = false,
+#  requireAllFields = true,
+#  omitOptionalFields = true, # Skip optional fields==none in Writer
+#  allowUnknownFields = true,
+#  skipNullFields = false     # Skip optional fields==null in Reader
+
+ReqRespHeader.useDefaultReaderIn CrpcSys
+RequestRx.useDefaultReaderIn CrpcSys
+RequestRx2.useDefaultReaderIn CrpcSys
+
+ParamDescNamed.useDefaultWriterIn CrpcSys
+RequestTx.useDefaultWriterIn CrpcSys
+ResponseTx.useDefaultWriterIn CrpcSys
+
+ResponseError.useDefaultSerializationIn CrpcSys
+
+CrpcSys.defaultSerialization Opt[JsonRPC2]
+CrpcSys.defaultSerialization Opt[ResponseError]
+CrpcSys.defaultSerialization Opt[JsonString]
+CrpcSys.defaultWriter Opt[RequestId]
+
+type
+  RpcSysWriters* = JrpcSys.Writer | CrpcSys.Writer
+  RpcSysReaders* = JrpcSys.Reader | CrpcSys.Reader
+
 const
   JsonRPC2Literal = JsonString("\"2.0\"")
   MaxIdStringLength = 256
@@ -194,21 +222,31 @@ template shouldWriteObjectField*(field: RequestParamsTx): bool =
   of rpNamed:
     field.named.len > 0
 
+template shouldWriteObjectField*(F: type Cbor, field: RequestParamsTx): bool =
+  shouldWriteObjectField(field)
+
 func isFieldExpected*(_: type RequestParamsRx): bool {.compileTime.} =
   # A Structured value that holds the parameter values to be used during the
   # invocation of the method. This member MAY be omitted.
 
   false
 
-proc readValue*(r: var JsonReader[JrpcSys], val: var JsonRPC2)
-      {.gcsafe, raises: [IOError, JsonReaderError].} =
-  let version = r.parseAsString()
+func isFieldExpected*(F: type Cbor, _: type RequestParamsRx): bool {.compileTime.} =
+  false
+
+proc readJsonRPC2Literal(r: var JrpcSys.Reader): JsonString
+      {.gcsafe, raises: [IOError, SerializationError].} =
+  r.parseAsString()
+
+proc readValue*(r: var RpcSysReaders, val: var JsonRPC2)
+      {.gcsafe, raises: [IOError, SerializationError].} =
+  let version = r.readJsonRPC2Literal()
   if version != JsonRPC2Literal:
     r.raiseUnexpectedValue("Invalid JSON-RPC version, want=" &
       JsonRPC2Literal.string & " got=" & version.string)
 
 proc readValue*(
-    r: var JsonReader, value: var results.Opt[RequestId]
+    r: var RpcSysReaders, value: var results.Opt[RequestId]
 ) {.raises: [IOError, SerializationError].} =
   # Unlike the default reader in `results`, pass `null` to RequestId reader that
   # will handle it
@@ -216,12 +254,16 @@ proc readValue*(
 
   value.ok r.readValue(RequestId)
 
-proc writeValue*(w: var JsonWriter[JrpcSys], val: JsonRPC2)
+proc writeJsonRPC2Literal(w: var JrpcSys.Writer, val: JsonString)
       {.gcsafe, raises: [IOError].} =
-  w.writeValue JsonRPC2Literal
+  w.writeValue val
 
-proc readValue*(r: var JsonReader[JrpcSys], val: var RequestId)
-      {.gcsafe, raises: [IOError, JsonReaderError].} =
+proc writeValue*(w: var RpcSysWriters, val: JsonRPC2)
+      {.gcsafe, raises: [IOError].} =
+  w.writeJsonRPC2Literal(JsonRPC2Literal)
+
+proc readValue*(r: var RpcSysReaders, val: var RequestId)
+      {.gcsafe, raises: [IOError, SerializationError].} =
   let tok = r.tokKind
   case tok
   of JsonValueKind.Number:
@@ -234,14 +276,18 @@ proc readValue*(r: var JsonReader[JrpcSys], val: var RequestId)
   else:
     r.raiseUnexpectedValue("Invalid RequestId, must be Number, String, or Null, got=" & $tok)
 
-proc writeValue*(w: var JsonWriter[JrpcSys], val: RequestId)
+proc writeNullValue(w: var JrpcSys.Writer)
+       {.gcsafe, raises: [IOError].} =
+  w.writeValue JsonString("null")
+
+proc writeValue*(w: var RpcSysWriters, val: RequestId)
        {.gcsafe, raises: [IOError].} =
   case val.kind
   of riNumber: w.writeValue val.num
   of riString: w.writeValue val.str
-  of riNull:   w.writeValue JsonString("null")
+  of riNull:   w.writeNullValue()
 
-proc readValue*(r: var JsonReader[JrpcSys], val: var RequestParamsRx)
+proc readValue*(r: var RpcSysReaders, val: var RequestParamsRx)
        {.gcsafe, raises: [IOError, SerializationError].} =
   let tok = r.tokKind
   case tok
@@ -262,7 +308,7 @@ proc readValue*(r: var JsonReader[JrpcSys], val: var RequestParamsRx)
   else:
     r.raiseUnexpectedValue("RequestParam must be either array or object, got=" & $tok)
 
-proc writeValue*(w: var JsonWriter[JrpcSys], val: RequestParamsTx)
+proc writeValue*(w: var RpcSysWriters, val: RequestParamsTx)
       {.gcsafe, raises: [IOError].} =
   case val.kind
   of rpPositional:
@@ -273,7 +319,7 @@ proc writeValue*(w: var JsonWriter[JrpcSys], val: RequestParamsTx)
       w.writeField(x.name, x.value)
     w.endRecord()
 
-proc readValue*(r: var JsonReader[JrpcSys], val: var ResponseRx)
+proc readValue*(r: var RpcSysReaders, val: var ResponseRx)
        {.gcsafe, raises: [IOError, SerializationError].} =
   # We need to overload ResponseRx reader because
   # we don't want to skip null fields
@@ -285,7 +331,7 @@ proc readValue*(r: var JsonReader[JrpcSys], val: var ResponseRx)
     of "error"  : r.readValue(val.error)
     else: discard
 
-proc readValue*(r: var JsonReader[JrpcSys], val: var ResponseRx2)
+proc readValue*(r: var RpcSysReaders, val: var ResponseRx2)
        {.gcsafe, raises: [IOError, SerializationError].} =
   # https://www.jsonrpc.org/specification#response_object
 
@@ -319,7 +365,7 @@ proc readValue*(r: var JsonReader[JrpcSys], val: var ResponseRx2)
   else:
     val = ResponseRx2(id: id, kind: ResponseKind.rkResult, result: move(resultOpt[]))
 
-proc readValue*(r: var JsonReader[JrpcSys], val: var RequestBatchRx)
+proc readValue*(r: var RpcSysReaders, val: var RequestBatchRx)
        {.gcsafe, raises: [IOError, SerializationError].} =
   let tok = r.tokKind
   case tok
@@ -344,24 +390,24 @@ func toTx*(params: RequestParamsRx): RequestParamsTx =
     result = RequestParamsTx(kind: rpNamed)
     result.named = params.named
 
-template writeRequest*(writer: var JrpcSys.Writer, name: string, params: RequestParamsTx, id: int) =
+template writeRequest*(writer: var RpcSysWriters, name: string, params: RequestParamsTx, id: int) =
   writer.writeObject:
     writer.writeMember("jsonrpc", JsonRPC2())
     writer.writeMember("method", name)
     writer.writeMember("params", params)
     writer.writeMember("id", id)
 
-template writeNotification*(writer: var JrpcSys.Writer, name: string, params: RequestParamsTx) =
+template writeNotification*(writer: var RpcSysWriters, name: string, params: RequestParamsTx) =
   writer.writeObject:
     writer.writeMember("jsonrpc", JsonRPC2())
     writer.writeMember("method", name)
     writer.writeMember("params", params)
 
-template withWriter*(_: type JrpcSys, writer, body: untyped): seq[byte] =
+template withWriter*[T: JrpcSys | CrpcSys](F: type T, writer, body: untyped): seq[byte] =
   var stream = memoryOutput()
 
   {.cast(noSideEffect), cast(raises: []).}:
-    var writer = JrpcSys.Writer.init(stream)
+    var writer = F.Writer.init(stream)
     body
 
   stream.getOutput(seq[byte])

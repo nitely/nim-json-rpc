@@ -14,7 +14,6 @@ import
   chronos,
   ./[client, errors, jsonmarshal, router],
   ./private/jrpc_sys,
-  ./private/crpc_sys,
   ./private/shared_wrapper
 
 export chronos, client, jsonmarshal, router, sets, cbor_serialization

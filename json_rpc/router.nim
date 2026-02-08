@@ -14,7 +14,7 @@ import
   stew/byteutils,
   chronicles,
   chronos,
-  ./private/[jrpc_sys, crpc_sys, server_handler_wrapper],
+  ./private/[jrpc_sys, server_handler_wrapper],
   ./[errors, jsonmarshal]
 
 export chronos, jsonmarshal, json, jrpc_sys

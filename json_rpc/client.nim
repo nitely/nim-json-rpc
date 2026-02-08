@@ -23,7 +23,7 @@ import
   chronicles,
   stew/byteutils,
   results,
-  ./private/[client_handler_wrapper, crpc_sys, jrpc_sys, shared_wrapper],
+  ./private/[client_handler_wrapper, jrpc_sys, shared_wrapper],
   ./[errors, jsonmarshal, router]
 
 from strutils import replace
@@ -174,7 +174,7 @@ proc processMessage*(
 
     makeResponse(default(seq[byte]))
   except SerializationError as exc:
-    makeResponse(wrapError(router.INVALID_REQUEST, exc.msg))
+    makeResponse(wrapError(router.INVALID_REQUEST, exc.msg, client.format))
 
 proc clearPending*(client: RpcConnection, exc: ref JsonRpcError) =
   while client.pendingRequests.len > 0:
