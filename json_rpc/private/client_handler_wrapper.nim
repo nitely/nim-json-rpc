@@ -11,6 +11,7 @@
 
 import
   macros,
+  stew/byteutils,
   ./shared_wrapper,
   ./jrpc_sys
 
@@ -47,7 +48,10 @@ func setupConversion(reqParams, params, formatType: NimNode): NimNode =
 
   for parIdent, _, parType in paramsIter(params):
     result.add quote do:
-      `reqParams`.positional.add encode(`formatType`, `parIdent`).JsonString
+      when typeof(encode(`formatType`, `parIdent`)) is seq[byte]:
+        `reqParams`.positional.add string.fromBytes(encode(`formatType`, `parIdent`)).JsonString
+      else:
+        `reqParams`.positional.add encode(`formatType`, `parIdent`).JsonString
 
 template maybeUnwrapClientResult*(client, meth, reqParams, returnType, formatType): auto =
   ## Don't decode e.g. JsonString, return as is

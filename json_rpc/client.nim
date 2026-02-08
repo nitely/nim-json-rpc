@@ -23,14 +23,14 @@ import
   chronicles,
   stew/byteutils,
   results,
-  ./private/[client_handler_wrapper, jrpc_sys, shared_wrapper],
+  ./private/[client_handler_wrapper, crpc_sys, jrpc_sys, shared_wrapper],
   ./[errors, jsonmarshal, router]
 
 from strutils import replace
 
 export
   chronos, deques, tables, jsonmarshal, RequestParamsTx, RequestIdKind,
-  RequestId, RequestTx, RequestParamKind, results
+  RequestId, RequestTx, RequestParamKind, results, cbor_serialization
 
 logScope:
   topics = "jsonrpc client"
@@ -58,6 +58,7 @@ type
     remote*: string
       # Client identifier, for logging
     maxMessageSize*: int
+    format*: RpcFormat
 
   RpcRouterCallback* =
     proc(request: RequestBatchRx): Future[seq[byte]] {.async: (raises: []).}
@@ -73,9 +74,14 @@ type
 func hash*(v: RpcClient): Hash =
   cast[Hash](addr v[])
 
-func parseResponse(payload: openArray[byte], T: type): T {.raises: [JsonRpcError].} =
+func parseResponse(format: RpcFormat, payload: openArray[byte], T: type): T {.raises: [JsonRpcError].} =
   try:
-    JrpcSys.decode(payload, T)
+    case format
+    of RpcFormat.Json:
+      doAssert false
+      JrpcSys.decode(payload, T)
+    of RpcFormat.Cbor:
+      CrpcSys.decode(payload, T)
   except SerializationError as exc:
     raise (ref InvalidResponse)(
       msg: exc.formatMsg("msg"), payload: @payload, parent: exc
@@ -95,9 +101,14 @@ proc processsSingleResponse(
     move(response.result)
 
 proc processsSingleResponse*(
+    format: RpcFormat, body: openArray[byte], id: int
+): JsonString {.raises: [JsonRpcError].} =
+  processsSingleResponse(parseResponse(format, body, ResponseRx2), id)
+
+proc processsSingleResponse*(
     body: openArray[byte], id: int
 ): JsonString {.raises: [JsonRpcError].} =
-  processsSingleResponse(parseResponse(body, ResponseRx2), id)
+  processsSingleResponse(RpcFormat.Json, body, id)
 
 template withPendingFut*(client, fut, body: untyped): untyped =
   let fut = ResponseFut.init("jsonrpc.client.pending")
@@ -127,13 +138,20 @@ proc processMessage*(
     ret.complete(res)
     ret
 
+  #debugEcho "MSG ", repr line
   try:
-    let request = JrpcSys.decode(line, RequestBatchRx)
+    let request =
+      case client.format
+      of RpcFormat.Json:
+        doAssert false
+        JrpcSys.decode(line, RequestBatchRx)
+      of RpcFormat.Cbor:
+        CrpcSys.decode(line, RequestBatchRx)
     if client.router != nil:
       client.router(request)
     else:
       defaultRouter.route(request)
-  except IncompleteObjectError:
+  except json_serialization.IncompleteObjectError, cbor_serialization.IncompleteObjectError:
     if client.pendingRequests.len() > 0:
       # Each response corresponds to one request - the caller might cancel
       # the future but we must still pop exactly one request per response since
@@ -146,7 +164,7 @@ proc processMessage*(
         debug "Future already finished, dropping", state = fut.state()
     else:
       template shortLine(): string =
-        if line.len > 64:
+        if line.len > 1_000_000:
           string.fromBytes(line.toOpenArray(0, 64)) & "..."
         else:
           string.fromBytes(line)
@@ -184,8 +202,15 @@ proc notify*(
     client: RpcClient, name: string, params: RequestParamsTx
 ) {.async: (raises: [CancelledError, JsonRpcError], raw: true).} =
   ## Perform a "notification", ie a JSON-RPC request without response
-  let requestData = JrpcSys.withWriter(writer):
-    writer.writeNotification(name, params)
+  let requestData =
+    case client.format
+    of RpcFormat.Json:
+      doAssert false
+      JrpcSys.withWriter(writer):
+        writer.writeNotification(name, params)
+    of RpcFormat.Cbor:
+      CrpcSys.withWriter(writer):
+        writer.writeNotification(name, params)
 
   debug "Sending JSON-RPC notification",
     name, len = requestData.len, remote = client.remote
@@ -213,8 +238,15 @@ proc call*(
     # We don't really need an id since exchanges happen in order but using one
     # helps debugging, if nothing else
     id = client.getNextId()
-    requestData = JrpcSys.withWriter(writer):
-      writer.writeRequest(name, params, id)
+    requestData =
+      case client.format
+      of RpcFormat.Json:
+        doAssert false
+        JrpcSys.withWriter(writer):
+          writer.writeRequest(name, params, id)
+      of RpcFormat.Cbor:
+        CrpcSys.withWriter(writer):
+          writer.writeRequest(name, params, id)
 
   debug "Sending JSON-RPC request",
     name, len = requestData.len, id, remote = client.remote
@@ -230,7 +262,7 @@ proc call*(
 
       debug "Processing JSON-RPC response",
         len = resData.len, id, remote = client.remote
-      processsSingleResponse(resData, id)
+      processsSingleResponse(client.format, resData, id)
     except JsonRpcError as exc:
       debug "JSON-RPC request failed", err = exc.msg, id, remote = client.remote
       raise exc
@@ -260,10 +292,19 @@ proc callBatch*(
     res.complete(default(seq[ResponseRx2]))
     return res
 
-  let requestData = JrpcSys.withWriter(writer):
-    writer.writeArray:
-      for call in calls:
-        writer.writeValue(call)
+  let requestData =
+    case client.format
+    of RpcFormat.Json:
+      doAssert false
+      JrpcSys.withWriter(writer):
+        writer.writeArray:
+          for call in calls:
+            writer.writeValue(call)
+    of RpcFormat.Cbor:
+      CrpcSys.withWriter(writer):
+        writer.writeArray:
+          for call in calls:
+            writer.writeValue(call)
 
   debug "Sending JSON-RPC batch", len = requestData.len, remote = client.remote
 
@@ -274,7 +315,7 @@ proc callBatch*(
       let resData = await request
       debug "Processing JSON-RPC batch response",
         len = resData.len, remote = client.remote
-      parseResponse(resData, seq[ResponseRx2])
+      parseResponse(client.format, resData, seq[ResponseRx2])
     except JsonRpcError as exc:
       debug "JSON-RPC batch request failed", err = exc.msg, remote = client.remote
       raise exc
@@ -302,12 +343,23 @@ proc send*(
   var lastId: int
   var map = initTable[int, int]()
 
-  let requestData = JrpcSys.withWriter(writer):
-    writer.writeArray:
-      for i, item in batch.batch:
-        lastId = batch.client.getNextId()
-        map[lastId] = i
-        writer.writeValue(requestTx(item.meth, item.params, lastId))
+  let requestData =
+    case batch.client.format
+    of RpcFormat.Json:
+      doAssert false
+      JrpcSys.withWriter(writer):
+        writer.writeArray:
+          for i, item in batch.batch:
+            lastId = batch.client.getNextId()
+            map[lastId] = i
+            writer.writeValue(requestTx(item.meth, item.params, lastId))
+    of RpcFormat.Cbor:
+      CrpcSys.withWriter(writer):
+        writer.writeArray:
+          for i, item in batch.batch:
+            lastId = batch.client.getNextId()
+            map[lastId] = i
+            writer.writeValue(requestTx(item.meth, item.params, lastId))
 
   debug "Sending JSON-RPC batch",
     len = requestData.len, lastId, remote = batch.client.remote
@@ -323,7 +375,7 @@ proc send*(
           debug "Processing JSON-RPC batch response",
             len = resData.len, lastId, remote = client.remote
 
-          parseResponse(resData, seq[ResponseRx2])
+          parseResponse(client.format, resData, seq[ResponseRx2])
         except JsonRpcError as exc:
           debug "JSON-RPC batch request failed", err = exc.msg, remote = client.remote
 
@@ -339,7 +391,12 @@ proc send*(
       case response.kind
       of ResponseKind.rkError:
         responses[index] =
-          RpcBatchResponse(error: Opt.some(JrpcSys.encode(response.error)))
+          case client.format
+          of RpcFormat.Json:
+            doAssert false
+            RpcBatchResponse(error: Opt.some(JrpcSys.encode(response.error)))
+          of RpcFormat.Cbor:
+            RpcBatchResponse(error: Opt.some(string.fromBytes(CrpcSys.encode(response.error))))
       of ResponseKind.rkResult:
         responses[index] = RpcBatchResponse(result: move(response.result))
 
@@ -348,9 +405,16 @@ proc send*(
     for _, index in map:
       responses[index] = RpcBatchResponse(
         error: Opt.some(
-          JrpcSys.encode(
-            ResponseError(code: INTERNAL_ERROR, message: "Missing response from server")
-          )
+          case client.format
+          of RpcFormat.Json:
+            doAssert false
+            JrpcSys.encode(
+              ResponseError(code: INTERNAL_ERROR, message: "Missing response from server")
+            )
+          of RpcFormat.Cbor:
+            string.fromBytes(CrpcSys.encode(
+              ResponseError(code: INTERNAL_ERROR, message: "Missing response from server")
+            ))
         )
       )
 

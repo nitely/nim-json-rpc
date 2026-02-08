@@ -14,9 +14,10 @@ import
   chronos,
   ./[client, errors, jsonmarshal, router],
   ./private/jrpc_sys,
+  ./private/crpc_sys,
   ./private/shared_wrapper
 
-export chronos, client, jsonmarshal, router, sets
+export chronos, client, jsonmarshal, router, sets, cbor_serialization
 
 type
   RpcServer* = ref object of RootRef
@@ -29,8 +30,11 @@ type
 # Constructors
 # ------------------------------------------------------------------------------
 
+proc new*(T: type RpcServer, format: RpcFormat): T =
+  T(router: RpcRouter.init(format = format))
+
 proc new*(T: type RpcServer): T =
-  T(router: RpcRouter.init())
+  T(router: RpcRouter.init(format = RpcFormat.Json))
 
 # ------------------------------------------------------------------------------
 # Public functions

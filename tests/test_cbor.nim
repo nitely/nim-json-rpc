@@ -7,15 +7,16 @@
 # This file may not be copied, modified, or distributed except according to
 # those terms.
 
-import ../json_rpc/rpcclient except EnumRepresentation, shouldWriteObjectField
-import ../json_rpc/rpcserver except EnumRepresentation, shouldWriteObjectField
+import ../json_rpc/rpcclient
+import ../json_rpc/rpcserver
 import
-  chronos/unittest2/asynctests,
-  ../json_rpc/pkg/cbor
+  chronos/unittest2/asynctests
 
 createCborFlavor CborFlavor,
   automaticObjectSerialization = false,
   automaticPrimitivesSerialization = false
+
+CborFlavor.defaultSerialization string
 
 proc setupServer*(srv: RpcServer) =
   srv.rpc(CborFlavor):
@@ -29,13 +30,15 @@ createRpcSigsFromNim(RpcClient, CborFlavor):
 template callTests(client: untyped) =
   test "Successful RPC call":
     let r = waitFor client.myProcCtx1("abc")
-    check r.string == "\"abc\""
+    check r.string == "abc"
 
 suite "Socket Server/Client RPC/lengthHeaderBE32":
   setup:
     const framing = Framing.lengthHeaderBE32()
-    var srv = newRpcSocketServer(["127.0.0.1:0"], framing = framing)
-    var client = newRpcSocketClient(framing = framing)
+    const format = RpcFormat.Cbor
+    var srv = newRpcSocketServer(["127.0.0.1:0"], framing = framing, format = format)
+    var client = newRpcSocketClient(framing = framing, format = format)
+    doAssert client.format == RpcFormat.Cbor
 
     srv.setupServer()
     srv.start()

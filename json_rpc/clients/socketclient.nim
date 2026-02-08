@@ -159,15 +159,19 @@ proc new*(
     maxMessageSize = defaultMaxMessageSize,
     router = default(RpcRouterCallback),
     framing = Framing.newLine(),
+    format = RpcFormat.Json,
 ): T =
-  T(maxMessageSize: maxMessageSize, router: router, framing: framing)
+  T(maxMessageSize: maxMessageSize, router: router, framing: framing, format: format)
 
 proc new*(
     T: type RpcSocketClient,
     maxMessageSize = defaultMaxMessageSize,
     router = default(ref RpcRouter),
     framing = Framing.newLine(),
+    format = RpcFormat.Json,
 ): T =
+  if router != nil:
+    router.format = format
   let router =
     if router != nil:
       proc(
@@ -176,15 +180,16 @@ proc new*(
         router[].route(request)
     else:
       nil
-  T.new(maxMessageSize, router, framing)
+  T.new(maxMessageSize, router, framing, format)
 
 proc newRpcSocketClient*(
     maxMessageSize = defaultMaxMessageSize,
     router = default(ref RpcRouter),
     framing = Framing.newLine(),
+    format = RpcFormat.Json,
 ): RpcSocketClient =
   ## Creates a new client instance.
-  RpcSocketClient.new(maxMessageSize, router, framing)
+  RpcSocketClient.new(maxMessageSize, router, framing, format)
 
 method send*(
     client: RpcSocketClient, reqData: seq[byte]

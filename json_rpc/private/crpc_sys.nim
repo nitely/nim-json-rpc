@@ -14,6 +14,7 @@ import
   results,
   cbor_serialization,
   cbor_serialization/pkg/results as cborresults,
+  stew/byteutils,
   ./jrpc_sys
 
 export results, cbor_serialization, cborresults, jrpc_sys
@@ -21,10 +22,10 @@ export results, cbor_serialization, cborresults, jrpc_sys
 # This module implements JSON-RPC 2.0 Specification
 # https://www.jsonrpc.org/specification
 
-# don't mix the json-rpc system encoding with the
-# actual response/params encoding
+# XXX disable distinct writer
 createCborFlavor CrpcSys,
   automaticObjectSerialization = false,
+#  automaticPrimitivesSerialization = false,
   requireAllFields = true,
   omitOptionalFields = true, # Skip optional fields==none in Writer
   allowUnknownFields = true,
@@ -40,31 +41,42 @@ ResponseTx.useDefaultWriterIn CrpcSys
 
 ResponseError.useDefaultSerializationIn CrpcSys
 
+CrpcSys.defaultSerialization Opt[JsonRPC2]
+CrpcSys.defaultSerialization Opt[ResponseError]
+CrpcSys.defaultSerialization Opt[JsonString]
+CrpcSys.defaultWriter Opt[RequestId]
+
 const
   JsonRPC2Literal = "2.0"
   MaxIdStringLength = 256
 
+proc toJsonString(value: CborBytes): JsonString =
+  string.fromBytes(seq[byte](value)).JsonString
+
+proc readValue*(r: var CrpcSys.Reader, val: var JsonString)
+       {.gcsafe, raises: [IOError, SerializationError].} =
+  val = r.readValue(CborBytes).toJsonString()
+
+proc writeValue*(w: var CrpcSys.Writer, val: JsonString)
+       {.gcsafe, raises: [IOError].} =
+  w.writeValue CborBytes(val.string.toBytes())
+
 proc readValue*(r: var CrpcSys.Reader, val: var JsonRPC2)
-      {.gcsafe, raises: [IOError, CborReaderError].} =
+      {.gcsafe, raises: [IOError, SerializationError].} =
   let version = r.readValue(string)
   if version != JsonRPC2Literal:
     r.raiseUnexpectedValue("Invalid JSON-RPC version, want=" &
       JsonRPC2Literal & " got=" & version)
 
-proc readValue*(
-    r: var CrpcSys.Reader, value: var results.Opt[RequestId]
-) {.raises: [IOError, SerializationError].} =
-  value.ok r.readValue(RequestId)
-
-proc writeValue*(w: var CrpcSys.Reader, val: JsonRPC2)
+proc writeValue*(w: var CrpcSys.Writer, val: JsonRPC2)
       {.gcsafe, raises: [IOError].} =
   w.writeValue JsonRPC2Literal
 
 proc readValue*(r: var CrpcSys.Reader, val: var RequestId)
-      {.gcsafe, raises: [IOError, CborReaderError].} =
+      {.gcsafe, raises: [IOError, SerializationError].} =
   let ck = r.parser.cborKind()
   case ck
-  of CborValueKind.Number:
+  of CborValueKind.Unsigned, CborValueKind.Negative:
     val = RequestId(kind: riNumber, num: r.readValue(int))
   of CborValueKind.String:
     val = RequestId(kind: riString, str: r.parseString(MaxIdStringLength))
@@ -81,6 +93,28 @@ proc writeValue*(w: var CrpcSys.Writer, val: RequestId)
   of riString: w.writeValue val.str
   of riNull:   w.writeValue cborNull
 
+proc readValue*(
+    r: var CrpcSys.Reader, value: var Opt[RequestId]
+) {.raises: [IOError, SerializationError].} =
+  value.ok r.readValue(RequestId)
+
+proc toJsonKind(k: CborValueKind): JsonValueKind =
+  case k
+  of CborValueKind.Bytes: JsonValueKind.Array
+  of CborValueKind.String: JsonValueKind.String
+  of CborValueKind.Unsigned,
+      CborValueKind.Negative,
+      CborValueKind.Float:
+    JsonValueKind.Number
+  of CborValueKind.Object: JsonValueKind.Object
+  of CborValueKind.Array: JsonValueKind.Array
+  of CborValueKind.Bool: JsonValueKind.Bool
+  of CborValueKind.Null,
+      CborValueKind.Undefined,
+      CborValueKind.Tag,
+      CborValueKind.Simple:
+    JsonValueKind.Null
+
 proc readValue*(r: var CrpcSys.Reader, val: var RequestParamsRx)
        {.gcsafe, raises: [IOError, SerializationError].} =
   let ck = r.parser.cborKind()
@@ -89,24 +123,26 @@ proc readValue*(r: var CrpcSys.Reader, val: var RequestParamsRx)
     val = RequestParamsRx(kind: rpPositional)
     r.parseArray:
       val.positional.add ParamDescRx(
-        kind: ck,
-        param: r.readValue(CborBytes),
+        kind: ck.toJsonKind(),
+        param: r.readValue(CborBytes).toJsonString(),
       )
   of CborValueKind.Object:
     val = RequestParamsRx(kind: rpNamed)
     for key in r.readObjectFields():
       val.named.add ParamDescNamed(
         name: key,
-        value: r.readValue(CborBytes),
+        value: r.readValue(CborBytes).toJsonString(),
       )
   else:
     r.raiseUnexpectedValue("RequestParam must be either array or object, got=" & $ck)
 
 proc writeValue*(w: var CrpcSys.Writer, val: RequestParamsTx)
       {.gcsafe, raises: [IOError].} =
+  mixin writeValue
+
   case val.kind
   of rpPositional:
-    w.writeArray val.positional
+    w.writeValue val.positional
   of rpNamed:
     #w.beginRecord RequestParamsTx
     w.writeObject:
@@ -121,7 +157,7 @@ proc readValue*(r: var CrpcSys.Reader, val: var ResponseRx)
     case key
     of "jsonrpc": r.readValue(val.jsonrpc)
     of "id"     : r.readValue(val.id)
-    of "result" : val.result = r.readValue(CborBytes)
+    of "result" : val.result = r.readValue(CborBytes).toJsonString()
     of "error"  : r.readValue(val.error)
     else: discard
 
@@ -139,17 +175,17 @@ proc readValue*(r: var CrpcSys.Reader, val: var ResponseRx2)
     case key
     of "jsonrpc": r.readValue(jsonrpcOpt)
     of "id"     : r.readValue(idOpt)
-    of "result" : resultOpt.ok r.readValue(CborBytes)
+    of "result" : resultOpt.ok r.readValue(CborBytes).toJsonString
     of "error"  : r.readValue(errorOpt)
     else: discard
 
   if jsonrpcOpt.isNone:
-    r.raiseIncompleteObject("Missing or invalid `jsonrpc` version")
+    r.parser.raiseIncompleteObject("Missing or invalid `jsonrpc` version")
   let id = idOpt.valueOr:
-    r.raiseIncompleteObject("Missing `id` field")
+    r.parser.raiseIncompleteObject("Missing `id` field")
 
   if resultOpt.isNone() and errorOpt.isNone():
-    r.raiseIncompleteObject("Missing `result` or `error` field")
+    r.parser.raiseIncompleteObject("Missing `result` or `error` field")
 
   if errorOpt.isSome():
     if resultOpt.isSome():

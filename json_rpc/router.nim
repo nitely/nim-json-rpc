@@ -14,7 +14,7 @@ import
   stew/byteutils,
   chronicles,
   chronos,
-  ./private/[jrpc_sys, server_handler_wrapper],
+  ./private/[jrpc_sys, crpc_sys, server_handler_wrapper],
   ./[errors, jsonmarshal]
 
 export chronos, jsonmarshal, json, jrpc_sys
@@ -84,11 +84,20 @@ func lookup(router: RpcRouter, req: RequestRx2): Opt[RpcProc] =
   else:
     ok(rpcProc)
 
-template wrapErrorImpl(code: int, msg: string, formatType: untyped): untyped =
-  formatType.withWriter(writer):
-    writer.writeValue(
-      ResponseTx(kind: rkError, error: ResponseError(code: code, message: msg))
-    )
+template wrapErrorImpl(code: int, msg: string, format: RpcFormat): untyped =
+  case format
+  of RpcFormat.Json:
+
+    doAssert false
+    JrpcSys.withWriter(writer):
+      writeValue(
+        writer, ResponseTx(kind: rkError, error: ResponseError(code: code, message: msg))
+      )
+  of RpcFormat.Cbor:
+    CrpcSys.withWriter(writer):
+      writeValue(
+        writer, ResponseTx(kind: rkError, error: ResponseError(code: code, message: msg))
+      )
 
 func wrapError*(code: int, msg: string, format: RpcFormat): seq[byte] =
   wrapErrorImpl(code, msg, format)
@@ -101,6 +110,9 @@ func wrapError*(code: int, msg: string): seq[byte] =
 # ------------------------------------------------------------------------------
 
 proc init*(T: type RpcRouter): T = discard
+
+proc init*(T: type RpcRouter, format: RpcFormat): T =
+  T(format: format)
 
 proc register*(router: var RpcRouter, path: string, call: RpcProc) =
   router.procs[path] = call
@@ -130,7 +142,13 @@ proc route*(router: RpcRouter, req: RequestRx2):
 
     # Errors that are not specifically raised as `ApplicationError`s will be
     # returned as custom server errors.
-    req.serverError(escapeJson(err.msg).JsonString)
+    case router.format
+    of RpcFormat.Json:
+
+      doAssert false
+      req.serverError(escapeJson(err.msg).JsonString)
+    of RpcFormat.Cbor:
+      req.serverError(string.fromBytes(CrpcSys.encode(err.msg)).JsonString)
 
 proc route*(
     router: RpcRouter, request: RequestBatchRx
@@ -143,6 +161,8 @@ proc route*(
     if request.single.id.isSome:
       case router.format
       of RpcFormat.Json:
+
+        doAssert false
         JrpcSys.withWriter(writer):
           writer.writeValue(response)
       of RpcFormat.Cbor:
@@ -161,6 +181,8 @@ proc route*(
     if request.many.anyIt(it.id.isSome()):
       case router.format
       of RpcFormat.Json:
+
+        doAssert false
         JrpcSys.withWriter(writer):
           writer.writeArray:
             for i, fut in responses.mpairs():
@@ -188,9 +210,12 @@ proc route*(
   ## Returns the JSON-encoded response.
   let request =
     try:
+      doAssert false
       JrpcSys.decode(data, RequestBatchRx)
-    except IncompleteObjectError as err:
+    except json_serialization.IncompleteObjectError as err:
       return string.fromBytes(wrapError(INVALID_REQUEST, err.msg))
+    #except cbor_serialization.IncompleteObjectError as err:
+    #  return string.fromBytes(wrapError(INVALID_REQUEST, err.msg))
     except SerializationError as err:
       return string.fromBytes(wrapError(JSON_PARSE_ERROR, err.msg))
 
