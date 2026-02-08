@@ -50,17 +50,6 @@ const
   JsonRPC2Literal = "2.0"
   MaxIdStringLength = 256
 
-proc toJsonString(value: CborBytes): JsonString =
-  string.fromBytes(seq[byte](value)).JsonString
-
-proc readValue*(r: var CrpcSys.Reader, val: var JsonString)
-       {.gcsafe, raises: [IOError, SerializationError].} =
-  val = r.readValue(CborBytes).toJsonString()
-
-proc writeValue*(w: var CrpcSys.Writer, val: JsonString)
-       {.gcsafe, raises: [IOError].} =
-  w.writeValue CborBytes(val.string.toBytes())
-
 proc readValue*(r: var CrpcSys.Reader, val: var JsonRPC2)
       {.gcsafe, raises: [IOError, SerializationError].} =
   let version = r.readValue(string)
@@ -98,22 +87,30 @@ proc readValue*(
 ) {.raises: [IOError, SerializationError].} =
   value.ok r.readValue(RequestId)
 
+proc toJsonString(value: CborBytes): JsonString =
+  string.fromBytes(seq[byte](value)).JsonString
+
+proc readValue*(r: var CrpcSys.Reader, val: var JsonString)
+       {.gcsafe, raises: [IOError, SerializationError].} =
+  val = r.readValue(CborBytes).toJsonString()
+
+proc writeValue*(w: var CrpcSys.Writer, val: JsonString)
+       {.gcsafe, raises: [IOError].} =
+  w.writeValue CborBytes(val.string.toBytes())
+
 proc toJsonKind(k: CborValueKind): JsonValueKind =
   case k
   of CborValueKind.Bytes: JsonValueKind.Array
   of CborValueKind.String: JsonValueKind.String
-  of CborValueKind.Unsigned,
-      CborValueKind.Negative,
-      CborValueKind.Float:
-    JsonValueKind.Number
+  of CborValueKind.Unsigned, CborValueKind.Negative, CborValueKind.Float: JsonValueKind.Number
   of CborValueKind.Object: JsonValueKind.Object
   of CborValueKind.Array: JsonValueKind.Array
   of CborValueKind.Bool: JsonValueKind.Bool
-  of CborValueKind.Null,
-      CborValueKind.Undefined,
-      CborValueKind.Tag,
-      CborValueKind.Simple:
-    JsonValueKind.Null
+  of CborValueKind.Null, CborValueKind.Undefined: JsonValueKind.Null
+  # This is not quite accurate but it does not matter; it's only
+  # used to check if ParamDescRx kind is null or not
+  of CborValueKind.Tag: JsonValueKind.Array
+  of CborValueKind.Simple: JsonValueKind.Number
 
 proc readValue*(r: var CrpcSys.Reader, val: var RequestParamsRx)
        {.gcsafe, raises: [IOError, SerializationError].} =
@@ -138,13 +135,10 @@ proc readValue*(r: var CrpcSys.Reader, val: var RequestParamsRx)
 
 proc writeValue*(w: var CrpcSys.Writer, val: RequestParamsTx)
       {.gcsafe, raises: [IOError].} =
-  mixin writeValue
-
   case val.kind
   of rpPositional:
     w.writeValue val.positional
   of rpNamed:
-    #w.beginRecord RequestParamsTx
     w.writeObject:
       for x in val.named:
         w.writeField(x.name, x.value)
