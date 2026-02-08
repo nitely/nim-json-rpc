@@ -87,8 +87,7 @@ func lookup(router: RpcRouter, req: RequestRx2): Opt[RpcProc] =
 template wrapErrorImpl(code: int, msg: string, format: RpcFormat): untyped =
   case format
   of RpcFormat.Json:
-
-    doAssert false
+    #doAssert false
     JrpcSys.withWriter(writer):
       writeValue(
         writer, ResponseTx(kind: rkError, error: ResponseError(code: code, message: msg))
@@ -144,8 +143,7 @@ proc route*(router: RpcRouter, req: RequestRx2):
     # returned as custom server errors.
     case router.format
     of RpcFormat.Json:
-
-      doAssert false
+      #doAssert false
       req.serverError(escapeJson(err.msg).JsonString)
     of RpcFormat.Cbor:
       req.serverError(string.fromBytes(CrpcSys.encode(err.msg)).JsonString)
@@ -161,8 +159,7 @@ proc route*(
     if request.single.id.isSome:
       case router.format
       of RpcFormat.Json:
-
-        doAssert false
+        #doAssert false
         JrpcSys.withWriter(writer):
           writer.writeValue(response)
       of RpcFormat.Cbor:
@@ -181,8 +178,7 @@ proc route*(
     if request.many.anyIt(it.id.isSome()):
       case router.format
       of RpcFormat.Json:
-
-        doAssert false
+        #doAssert false
         JrpcSys.withWriter(writer):
           writer.writeArray:
             for i, fut in responses.mpairs():
@@ -210,7 +206,7 @@ proc route*(
   ## Returns the JSON-encoded response.
   let request =
     try:
-      doAssert false
+      #doAssert false
       JrpcSys.decode(data, RequestBatchRx)
     except json_serialization.IncompleteObjectError as err:
       return string.fromBytes(wrapError(INVALID_REQUEST, err.msg))

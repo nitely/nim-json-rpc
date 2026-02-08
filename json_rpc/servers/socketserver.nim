@@ -42,7 +42,7 @@ proc processClient(
     c = RpcSocketClient.new(
       maxMessageSize = rpc.maxMessageSize,
       framing = rpc.framing,
-      format = RpcFormat.Cbor,  # XXX fix
+      format = router.format,
       router = proc(
           request: RequestBatchRx
       ): Future[seq[byte]] {.async: (raises: [], raw: true).} =

@@ -78,7 +78,7 @@ func parseResponse(format: RpcFormat, payload: openArray[byte], T: type): T {.ra
   try:
     case format
     of RpcFormat.Json:
-      doAssert false
+      #doAssert false
       JrpcSys.decode(payload, T)
     of RpcFormat.Cbor:
       CrpcSys.decode(payload, T)
@@ -143,7 +143,7 @@ proc processMessage*(
     let request =
       case client.format
       of RpcFormat.Json:
-        doAssert false
+        #doAssert false
         JrpcSys.decode(line, RequestBatchRx)
       of RpcFormat.Cbor:
         CrpcSys.decode(line, RequestBatchRx)
@@ -174,6 +174,7 @@ proc processMessage*(
 
     makeResponse(default(seq[byte]))
   except SerializationError as exc:
+    debugEcho exc.msg
     makeResponse(wrapError(router.INVALID_REQUEST, exc.msg, client.format))
 
 proc clearPending*(client: RpcConnection, exc: ref JsonRpcError) =
@@ -205,7 +206,7 @@ proc notify*(
   let requestData =
     case client.format
     of RpcFormat.Json:
-      doAssert false
+      #doAssert false
       JrpcSys.withWriter(writer):
         writer.writeNotification(name, params)
     of RpcFormat.Cbor:
@@ -241,7 +242,7 @@ proc call*(
     requestData =
       case client.format
       of RpcFormat.Json:
-        doAssert false
+        #doAssert false
         JrpcSys.withWriter(writer):
           writer.writeRequest(name, params, id)
       of RpcFormat.Cbor:
@@ -295,7 +296,7 @@ proc callBatch*(
   let requestData =
     case client.format
     of RpcFormat.Json:
-      doAssert false
+      #doAssert false
       JrpcSys.withWriter(writer):
         writer.writeArray:
           for call in calls:
@@ -346,7 +347,7 @@ proc send*(
   let requestData =
     case batch.client.format
     of RpcFormat.Json:
-      doAssert false
+      #doAssert false
       JrpcSys.withWriter(writer):
         writer.writeArray:
           for i, item in batch.batch:
@@ -390,13 +391,7 @@ proc send*(
 
       case response.kind
       of ResponseKind.rkError:
-        responses[index] =
-          case client.format
-          of RpcFormat.Json:
-            doAssert false
-            RpcBatchResponse(error: Opt.some(JrpcSys.encode(response.error)))
-          of RpcFormat.Cbor:
-            RpcBatchResponse(error: Opt.some(string.fromBytes(CrpcSys.encode(response.error))))
+        responses[index] = RpcBatchResponse(error: Opt.some(JrpcSys.encode(response.error)))
       of ResponseKind.rkResult:
         responses[index] = RpcBatchResponse(result: move(response.result))
 
@@ -404,18 +399,7 @@ proc send*(
     # missing requests
     for _, index in map:
       responses[index] = RpcBatchResponse(
-        error: Opt.some(
-          case client.format
-          of RpcFormat.Json:
-            doAssert false
-            JrpcSys.encode(
-              ResponseError(code: INTERNAL_ERROR, message: "Missing response from server")
-            )
-          of RpcFormat.Cbor:
-            string.fromBytes(CrpcSys.encode(
-              ResponseError(code: INTERNAL_ERROR, message: "Missing response from server")
-            ))
-        )
+        error: Opt.some(JrpcSys.encode(ResponseError(code: INTERNAL_ERROR, message: "Missing response from server")))
       )
 
     ok(responses)
