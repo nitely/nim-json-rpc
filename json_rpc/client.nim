@@ -78,7 +78,6 @@ func parseResponse(format: RpcFormat, payload: openArray[byte], T: type): T {.ra
   try:
     case format
     of RpcFormat.Json:
-      #doAssert false
       JrpcSys.decode(payload, T)
     of RpcFormat.Cbor:
       CrpcSys.decode(payload, T)
@@ -143,7 +142,6 @@ proc processMessage*(
     let request =
       case client.format
       of RpcFormat.Json:
-        #doAssert false
         JrpcSys.decode(line, RequestBatchRx)
       of RpcFormat.Cbor:
         CrpcSys.decode(line, RequestBatchRx)
@@ -206,7 +204,6 @@ proc notify*(
   let requestData =
     case client.format
     of RpcFormat.Json:
-      #doAssert false
       JrpcSys.withWriter(writer):
         writer.writeNotification(name, params)
     of RpcFormat.Cbor:
@@ -242,7 +239,6 @@ proc call*(
     requestData =
       case client.format
       of RpcFormat.Json:
-        #doAssert false
         JrpcSys.withWriter(writer):
           writer.writeRequest(name, params, id)
       of RpcFormat.Cbor:
@@ -274,11 +270,13 @@ proc call*(
 proc call*(
     client: RpcClient, name: string, params: JsonNode, Format: type SerializationFormat
 ): Future[JsonString] {.async: (raises: [CancelledError, JsonRpcError], raw: true).} =
+  client.format.validate(Format)
   client.call(name, paramsTx(params, Format))
 
 proc call*(
     client: RpcClient, name: string, params: JsonNode
 ): Future[JsonString] {.async: (raises: [CancelledError, JsonRpcError], raw: true).} =
+  client.format.validate(JrpcConv)
   client.call(name, paramsTx(params, JrpcConv))
 
 proc callBatch*(
@@ -296,7 +294,6 @@ proc callBatch*(
   let requestData =
     case client.format
     of RpcFormat.Json:
-      #doAssert false
       JrpcSys.withWriter(writer):
         writer.writeArray:
           for call in calls:
@@ -347,7 +344,6 @@ proc send*(
   let requestData =
     case batch.client.format
     of RpcFormat.Json:
-      #doAssert false
       JrpcSys.withWriter(writer):
         writer.writeArray:
           for i, item in batch.batch:

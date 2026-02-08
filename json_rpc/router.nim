@@ -87,7 +87,6 @@ func lookup(router: RpcRouter, req: RequestRx2): Opt[RpcProc] =
 template wrapErrorImpl(code: int, msg: string, format: RpcFormat): untyped =
   case format
   of RpcFormat.Json:
-    #doAssert false
     JrpcSys.withWriter(writer):
       writeValue(
         writer, ResponseTx(kind: rkError, error: ResponseError(code: code, message: msg))
@@ -103,6 +102,15 @@ func wrapError*(code: int, msg: string, format: RpcFormat): seq[byte] =
 
 func wrapError*(code: int, msg: string): seq[byte] =
   wrapError(code, msg, RpcFormat.Json)
+
+func validate*(format: RpcFormat, conv: type SerializationFormat) =
+  case format
+  of RpcFormat.Json:
+    when conv.Reader isnot JsonReader or conv.Writer isnot JsonWriter:
+      raiseAssert "Expected Json format, but found: " & $conv
+  of RpcFormat.Cbor:
+    when conv.Reader isnot CborReader or conv.Writer isnot CborWriter:
+      raiseAssert "Expected Cbor format, but found: " & $conv
 
 # ------------------------------------------------------------------------------
 # Public functions
@@ -143,7 +151,6 @@ proc route*(router: RpcRouter, req: RequestRx2):
     # returned as custom server errors.
     case router.format
     of RpcFormat.Json:
-      #doAssert false
       req.serverError(escapeJson(err.msg).JsonString)
     of RpcFormat.Cbor:
       req.serverError(string.fromBytes(CrpcSys.encode(err.msg)).JsonString)
@@ -159,7 +166,6 @@ proc route*(
     if request.single.id.isSome:
       case router.format
       of RpcFormat.Json:
-        #doAssert false
         JrpcSys.withWriter(writer):
           writer.writeValue(response)
       of RpcFormat.Cbor:
@@ -178,7 +184,6 @@ proc route*(
     if request.many.anyIt(it.id.isSome()):
       case router.format
       of RpcFormat.Json:
-        #doAssert false
         JrpcSys.withWriter(writer):
           writer.writeArray:
             for i, fut in responses.mpairs():
@@ -206,7 +211,6 @@ proc route*(
   ## Returns the JSON-encoded response.
   let request =
     try:
-      #doAssert false
       JrpcSys.decode(data, RequestBatchRx)
     except json_serialization.IncompleteObjectError as err:
       return string.fromBytes(wrapError(INVALID_REQUEST, err.msg))
@@ -226,6 +230,7 @@ proc rpcImpl(server: NimNode, path: string, formatType, body: NimNode): NimNode 
   result = wrapServerHandler(path, params, procBody, procWrapper, formatType)
 
   result.add quote do:
+    `server`.format.validate(`formatType`)
     `server`.register(`path`, `procWrapper`)
 
   when defined(nimDumpRpcs):

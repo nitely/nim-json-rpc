@@ -65,12 +65,14 @@ proc executeMethod*(server: RpcServer,
 proc executeMethod*(
     server: RpcServer, methodName: string, args: JsonNode, Format: type SerializationFormat
 ): Future[JsonString] {.async: (raises: [CancelledError, JsonRpcError], raw: true).} =
+  server.router.format.validate(Format)
   let params = paramsTx(args, Format)
   server.executeMethod(methodName, params)
 
 proc executeMethod*(
     server: RpcServer, methodName: string, args: JsonNode
 ): Future[JsonString] {.async: (raises: [CancelledError, JsonRpcError], raw: true).} =
+  server.router.format.validate(JrpcConv)
   let params = paramsTx(args, JrpcConv)
   server.executeMethod(methodName, params)
 

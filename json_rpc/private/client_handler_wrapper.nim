@@ -110,6 +110,7 @@ func createRpcFromSig*(clientType, rpcDecl, formatType: NimNode, alias = NimNode
 
   # perform rpc call
   let callBody = quote do:
+    `clientIdent`.format.validate(`formatType`)
     # populate request params
     `setup`
     maybeUnwrapClientResult(`clientIdent`, `pathStr`, `reqParams`, `returnType`, `formatType`)
