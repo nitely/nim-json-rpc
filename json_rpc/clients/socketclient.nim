@@ -13,7 +13,7 @@ import
   stew/[arrayops, byteutils, endians2],
   chronicles,
   ../[client, errors, router],
-  ../private/jrpc_sys,
+  ../private/rpc_sys,
   httputils
 
 export client, errors

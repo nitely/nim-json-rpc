@@ -13,7 +13,7 @@ import
    pkg/websock/websock,
   ./servers/[httpserver],
   ./clients/[httpclient, websocketclient],
-  ./private/jrpc_sys
+  ./private/rpc_sys
 
 type
   ClientKind* = enum

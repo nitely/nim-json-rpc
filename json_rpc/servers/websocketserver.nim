@@ -16,7 +16,7 @@ import
   websock/extensions/compression/deflate,
   json_serialization/std/net as jsnet,
   ../[errors, server],
-  ../private/jrpc_sys,
+  ../private/rpc_sys,
   ../clients/websocketclient
 
 export errors, server, jsnet

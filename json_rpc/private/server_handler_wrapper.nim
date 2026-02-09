@@ -20,7 +20,7 @@ import
   cbor_serialization/std/[options],
   cbor_serialization/pkg/results,
   ../errors,
-  ./jrpc_sys,
+  ./rpc_sys,
   ./shared_wrapper,
   ../jsonmarshal
 

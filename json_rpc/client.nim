@@ -23,7 +23,7 @@ import
   chronicles,
   stew/byteutils,
   results,
-  ./private/[client_handler_wrapper, jrpc_sys, shared_wrapper],
+  ./private/[client_handler_wrapper, rpc_sys, shared_wrapper],
   ./[errors, jsonmarshal, router]
 
 from strutils import replace

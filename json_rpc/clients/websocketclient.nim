@@ -15,7 +15,7 @@ import
   websock/[websock, extensions/compression/deflate],
   chronos/apps/http/httptable,
   ../[client, errors, router],
-  ../private/jrpc_sys
+  ../private/rpc_sys
 
 export client, errors
 

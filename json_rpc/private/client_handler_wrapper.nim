@@ -13,7 +13,7 @@ import
   macros,
   stew/byteutils,
   ./shared_wrapper,
-  ./jrpc_sys
+  ./rpc_sys
 
 func createRpcProc(procName, parameters, callBody: NimNode): NimNode =
   # parameters come as a tree

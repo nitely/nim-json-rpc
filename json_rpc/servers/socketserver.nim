@@ -16,7 +16,7 @@ import
   json_serialization/std/net as jsnet,
   ../private/utils,
   ../[errors, server],
-  ../private/jrpc_sys,
+  ../private/rpc_sys,
   ../clients/socketclient
 
 export errors, server, jsnet
