@@ -7,6 +7,8 @@
 # This file may not be copied, modified, or distributed except according to
 # those terms.
 
+--path:"/home/esteban/AtomProjects/nim-cbor-serialization"
+
 # begin Nimble config (version 1)
 when fileExists("nimble.paths"):
   include "nimble.paths"

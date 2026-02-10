@@ -171,7 +171,7 @@ proc new*(
     format = RpcFormat.Json,
 ): T =
   if router != nil:
-    router.format = format
+    router.format = format  # XXX validate instead of set
   let router =
     if router != nil:
       proc(

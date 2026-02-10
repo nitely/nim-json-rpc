@@ -24,11 +24,11 @@ createJsonFlavor JrpcSys,
   allowUnknownFields = true,
   skipNullFields = false     # Skip optional fields==null in Reader
 
-proc readJsonRPC2Literal*(r: var JrpcSys.Reader): JsonString
+proc readJsonRpc2Literal*(r: var JrpcSys.Reader): JsonString
       {.gcsafe, raises: [IOError, SerializationError].} =
   r.parseAsString()
 
-proc writeJsonRPC2Literal*(w: var JrpcSys.Writer, val: JsonString)
+proc writeJsonRpc2Literal*(w: var JrpcSys.Writer, val: JsonString)
       {.gcsafe, raises: [IOError].} =
   w.writeValue val
 

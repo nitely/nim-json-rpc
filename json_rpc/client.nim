@@ -76,11 +76,7 @@ func hash*(v: RpcClient): Hash =
 
 func parseResponse(format: RpcFormat, payload: openArray[byte], T: type): T {.raises: [JsonRpcError].} =
   try:
-    case format
-    of RpcFormat.Json:
-      JrpcSys.decode(payload, T)
-    of RpcFormat.Cbor:
-      CrpcSys.decode(payload, T)
+    format.decode(payload, T)
   except SerializationError as exc:
     raise (ref InvalidResponse)(
       msg: exc.formatMsg("msg"), payload: @payload, parent: exc
@@ -139,17 +135,12 @@ proc processMessage*(
 
   #debugEcho "MSG ", repr line
   try:
-    let request =
-      case client.format
-      of RpcFormat.Json:
-        JrpcSys.decode(line, RequestBatchRx)
-      of RpcFormat.Cbor:
-        CrpcSys.decode(line, RequestBatchRx)
+    let request = client.format.decode(line, RequestBatchRx)
     if client.router != nil:
       client.router(request)
     else:
       defaultRouter.route(request)
-  except json_serialization.IncompleteObjectError, cbor_serialization.IncompleteObjectError:
+  except IncompleteObjectError, CborIncompleteObjectError:
     if client.pendingRequests.len() > 0:
       # Each response corresponds to one request - the caller might cancel
       # the future but we must still pop exactly one request per response since
@@ -201,14 +192,8 @@ proc notify*(
     client: RpcClient, name: string, params: RequestParamsTx
 ) {.async: (raises: [CancelledError, JsonRpcError], raw: true).} =
   ## Perform a "notification", ie a JSON-RPC request without response
-  let requestData =
-    case client.format
-    of RpcFormat.Json:
-      JrpcSys.withWriter(writer):
-        writer.writeNotification(name, params)
-    of RpcFormat.Cbor:
-      CrpcSys.withWriter(writer):
-        writer.writeNotification(name, params)
+  let requestData = client.format.withWriter(writer):
+    writer.writeNotification(name, params)
 
   debug "Sending JSON-RPC notification",
     name, len = requestData.len, remote = client.remote
@@ -236,14 +221,8 @@ proc call*(
     # We don't really need an id since exchanges happen in order but using one
     # helps debugging, if nothing else
     id = client.getNextId()
-    requestData =
-      case client.format
-      of RpcFormat.Json:
-        JrpcSys.withWriter(writer):
-          writer.writeRequest(name, params, id)
-      of RpcFormat.Cbor:
-        CrpcSys.withWriter(writer):
-          writer.writeRequest(name, params, id)
+    requestData = client.format.withWriter(writer):
+      writer.writeRequest(name, params, id)
 
   debug "Sending JSON-RPC request",
     name, len = requestData.len, id, remote = client.remote
@@ -291,18 +270,10 @@ proc callBatch*(
     res.complete(default(seq[ResponseRx2]))
     return res
 
-  let requestData =
-    case client.format
-    of RpcFormat.Json:
-      JrpcSys.withWriter(writer):
-        writer.writeArray:
-          for call in calls:
-            writer.writeValue(call)
-    of RpcFormat.Cbor:
-      CrpcSys.withWriter(writer):
-        writer.writeArray:
-          for call in calls:
-            writer.writeValue(call)
+  let requestData = client.format.withWriter(writer):
+    writer.writeArray:
+      for call in calls:
+        writer.writeValue(call)
 
   debug "Sending JSON-RPC batch", len = requestData.len, remote = client.remote
 
@@ -341,22 +312,12 @@ proc send*(
   var lastId: int
   var map = initTable[int, int]()
 
-  let requestData =
-    case batch.client.format
-    of RpcFormat.Json:
-      JrpcSys.withWriter(writer):
-        writer.writeArray:
-          for i, item in batch.batch:
-            lastId = batch.client.getNextId()
-            map[lastId] = i
-            writer.writeValue(requestTx(item.meth, item.params, lastId))
-    of RpcFormat.Cbor:
-      CrpcSys.withWriter(writer):
-        writer.writeArray:
-          for i, item in batch.batch:
-            lastId = batch.client.getNextId()
-            map[lastId] = i
-            writer.writeValue(requestTx(item.meth, item.params, lastId))
+  let requestData = batch.client.format.withWriter(writer):
+    writer.writeArray:
+      for i, item in batch.batch:
+        lastId = batch.client.getNextId()
+        map[lastId] = i
+        writer.writeValue(requestTx(item.meth, item.params, lastId))
 
   debug "Sending JSON-RPC batch",
     len = requestData.len, lastId, remote = batch.client.remote

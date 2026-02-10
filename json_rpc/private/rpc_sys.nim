@@ -137,6 +137,10 @@ type
     of rbkSingle:
       single*: RequestRx2
 
+  RpcFormat* {.pure.} = enum
+    Json
+    Cbor
+
 ## JrpcSys
 
 ReqRespHeader.useDefaultReaderIn JrpcSys
@@ -221,7 +225,7 @@ func isFieldExpected*(F: type Cbor, _: type RequestParamsRx): bool {.compileTime
 
 proc readValue*(r: var RpcSysReaders, val: var JsonRPC2)
       {.gcsafe, raises: [IOError, SerializationError].} =
-  let version = r.readJsonRPC2Literal()
+  let version = r.readJsonRpc2Literal()
   if version != JsonRPC2Literal:
     r.raiseUnexpectedValue("Invalid JSON-RPC version, want=" &
       JsonRPC2Literal.string & " got=" & version.string)
@@ -237,7 +241,7 @@ proc readValue*(
 
 proc writeValue*(w: var RpcSysWriters, val: JsonRPC2)
       {.gcsafe, raises: [IOError].} =
-  w.writeJsonRPC2Literal(JsonRPC2Literal)
+  w.writeJsonRpc2Literal(JsonRPC2Literal)
 
 proc readValue*(r: var RpcSysReaders, val: var RequestId)
       {.gcsafe, raises: [IOError, SerializationError].} =
@@ -384,5 +388,21 @@ template withWriter*[T: JrpcSys | CrpcSys](F: type T, writer, body: untyped): se
     body
 
   stream.getOutput(seq[byte])
+
+template decode*(format: RpcFormat, data, T: untyped): untyped =
+  case format
+  of RpcFormat.Json:
+    JrpcSys.decode(data, T)
+  of RpcFormat.Cbor:
+    CrpcSys.decode(data, T)
+
+template withWriter*(format: RpcFormat, writer, body: untyped): untyped =
+  case format
+  of RpcFormat.Json:
+    withWriter(JrpcSys, writer):
+      body
+  of RpcFormat.Cbor:
+    withWriter(CrpcSys, writer):
+      body
 
 {.pop.}

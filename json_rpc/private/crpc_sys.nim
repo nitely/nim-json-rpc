@@ -40,7 +40,7 @@ proc writeValue*(w: var CrpcSys.Writer, val: CborString)
        {.gcsafe, raises: [IOError].} =
   w.writeValue CborBytes(val.string.toBytes())
 
-proc readJsonRPC2Literal*(r: var CrpcSys.Reader): CborString
+proc readJsonRpc2Literal*(r: var CrpcSys.Reader): CborString
        {.gcsafe, raises: [IOError, SerializationError].} =
   r.readValue(string).CborString
 
