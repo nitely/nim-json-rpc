@@ -1,0 +1,32 @@
+nimTitle	httpserver	servers/httpserver.html	module json_rpc/servers/httpserver		0
+nim	HttpAuthHook	servers/httpserver.html#HttpAuthHook	type HttpAuthHook		37
+nim	RpcHttpHandler	servers/httpserver.html#RpcHttpHandler	type RpcHttpHandler		42
+nim	RpcHttpServer	servers/httpserver.html#RpcHttpServer	type RpcHttpServer		45
+nim	serveHTTP	servers/httpserver.html#serveHTTP,RpcHttpHandler,HttpRequestRef	proc serveHTTP(rpcServer: RpcHttpHandler; request: HttpRequestRef): InternalRaisesFuture[\n    HttpResponseRef, (CancelledError,)]		50
+nim	addHttpServer	servers/httpserver.html#addHttpServer,RpcHttpServer,TransportAddress,set[ServerFlags],string,int,int,int,int,int	proc addHttpServer(rpcServer: RpcHttpServer; address: TransportAddress;\n              socketFlags: set[ServerFlags] = {TcpNoDelay, ReuseAddr};\n              serverUri = Uri(); serverIdent = ""; maxConnections: int = -1;\n              bufferSize: int = 4096; backlogSize: int = 100;\n              httpHeadersTimeout = 10.seconds; maxHeadersSize: int = 8192;\n              maxRequestBodySize: int = defaultMaxMessageSize)		111
+nim	addSecureHttpServer	servers/httpserver.html#addSecureHttpServer,RpcHttpServer,TransportAddress,TLSPrivateKey,TLSCertificate,set[ServerFlags],string,set[TLSFlags],int,int,int,int,int	proc addSecureHttpServer(rpcServer: RpcHttpServer; address: TransportAddress;\n                    tlsPrivateKey: TLSPrivateKey;\n                    tlsCertificate: TLSCertificate;\n                    socketFlags: set[ServerFlags] = {TcpNoDelay, ReuseAddr};\n                    serverUri = Uri(); serverIdent: string = JsonRpcIdent;\n                    secureFlags: set[TLSFlags] = {}; maxConnections: int = -1;\n                    backlogSize: int = 100; bufferSize: int = 4096;\n                    httpHeadersTimeout = 10.seconds; maxHeadersSize: int = 8192;\n                    maxRequestBodySize: int = defaultMaxMessageSize)		137
+nim	addHttpServers	servers/httpserver.html#addHttpServers,RpcHttpServer,openArray[TransportAddress]	proc addHttpServers(server: RpcHttpServer; addresses: openArray[TransportAddress])		168
+nim	addSecureHttpServers	servers/httpserver.html#addSecureHttpServers,RpcHttpServer,openArray[TransportAddress],TLSPrivateKey,TLSCertificate	proc addSecureHttpServers(server: RpcHttpServer;\n                     addresses: openArray[TransportAddress];\n                     tlsPrivateKey: TLSPrivateKey;\n                     tlsCertificate: TLSCertificate)		183
+nim	addHttpServer	servers/httpserver.html#addHttpServer,RpcHttpServer,string	proc addHttpServer(server: RpcHttpServer; address: string)		200
+nim	addSecureHttpServer	servers/httpserver.html#addSecureHttpServer,RpcHttpServer,string,TLSPrivateKey,TLSCertificate	proc addSecureHttpServer(server: RpcHttpServer; address: string;\n                    tlsPrivateKey: TLSPrivateKey; tlsCertificate: TLSCertificate)		204
+nim	addHttpServers	servers/httpserver.html#addHttpServers,RpcHttpServer,openArray[string]	proc addHttpServers(server: RpcHttpServer; addresses: openArray[string])		210
+nim	addHttpServer	servers/httpserver.html#addHttpServer,RpcHttpServer,string,Port	proc addHttpServer(server: RpcHttpServer; address: string; port: Port)		213
+nim	addSecureHttpServer	servers/httpserver.html#addSecureHttpServer,RpcHttpServer,string,Port,TLSPrivateKey,TLSCertificate	proc addSecureHttpServer(server: RpcHttpServer; address: string; port: Port;\n                    tlsPrivateKey: TLSPrivateKey; tlsCertificate: TLSCertificate)		216
+nim	new	servers/httpserver.html#new,typeRpcHttpServer,seq[HttpAuthHook]	proc new(T: type RpcHttpServer; authHooks: seq[HttpAuthHook] = @[]): T:type		223
+nim	new	servers/httpserver.html#new,typeRpcHttpServer,RpcRouter,seq[HttpAuthHook]	proc new(T: type RpcHttpServer; router: RpcRouter;\n    authHooks: seq[HttpAuthHook] = @[]): T:type		226
+nim	newRpcHttpServer	servers/httpserver.html#newRpcHttpServer,seq[HttpAuthHook]	proc newRpcHttpServer(authHooks: seq[HttpAuthHook] = @[]): RpcHttpServer		229
+nim	newRpcHttpServer	servers/httpserver.html#newRpcHttpServer,RpcRouter,seq[HttpAuthHook]	proc newRpcHttpServer(router: RpcRouter; authHooks: seq[HttpAuthHook] = @[]): RpcHttpServer		232
+nim	newRpcHttpServer	servers/httpserver.html#newRpcHttpServer,openArray[TransportAddress],seq[HttpAuthHook]	proc newRpcHttpServer(addresses: openArray[TransportAddress];\n                 authHooks: seq[HttpAuthHook] = @[]): RpcHttpServer		235
+nim	newRpcHttpServer	servers/httpserver.html#newRpcHttpServer,openArray[string],seq[HttpAuthHook]	proc newRpcHttpServer(addresses: openArray[string];\n                 authHooks: seq[HttpAuthHook] = @[]): RpcHttpServer		240
+nim	newRpcHttpServer	servers/httpserver.html#newRpcHttpServer,openArray[string],RpcRouter,seq[HttpAuthHook]	proc newRpcHttpServer(addresses: openArray[string]; router: RpcRouter;\n                 authHooks: seq[HttpAuthHook] = @[]): RpcHttpServer		245
+nim	newRpcHttpServer	servers/httpserver.html#newRpcHttpServer,openArray[TransportAddress],RpcRouter,seq[HttpAuthHook]	proc newRpcHttpServer(addresses: openArray[TransportAddress]; router: RpcRouter;\n                 authHooks: seq[HttpAuthHook] = @[]): RpcHttpServer		250
+nim	start	servers/httpserver.html#start,RpcHttpServer	proc start(server: RpcHttpServer)		255
+nim	stop	servers/httpserver.html#stop,RpcHttpServer	proc stop(server: RpcHttpServer): InternalRaisesFuture[void, void]		261
+nim	closeWait	servers/httpserver.html#closeWait,RpcHttpServer	proc closeWait(server: RpcHttpServer): InternalRaisesFuture[void, void]		267
+nim	localAddress	servers/httpserver.html#localAddress,RpcHttpServer	proc localAddress(server: RpcHttpServer): seq[TransportAddress]		272
+nim	setMaxChunkSize	servers/httpserver.html#setMaxChunkSize,RpcHttpServer,int	proc setMaxChunkSize(server: RpcHttpServer; maxChunkSize: int)		276
+nimgrp	addhttpservers	servers/httpserver.html#addHttpServers-procs-all	proc		168
+nimgrp	addhttpserver	servers/httpserver.html#addHttpServer-procs-all	proc		111
+nimgrp	addsecurehttpserver	servers/httpserver.html#addSecureHttpServer-procs-all	proc		137
+nimgrp	new	servers/httpserver.html#new-procs-all	proc		223
+nimgrp	newrpchttpserver	servers/httpserver.html#newRpcHttpServer-procs-all	proc		229
