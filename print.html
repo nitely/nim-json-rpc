@@ -204,6 +204,7 @@
 <p>The fundamental feature of the JSON-RPC protocol is the ability to request code execution of another party, including passing data either direction that may influence code execution. Neither the JSON-RPC protocol nor this library attempts to address the applicable security risks entailed.</p>
 <p>Before establishing a JSON-RPC connection with a party that exists outside your own trust boundary, consider the threats and how to mitigate them at your application level.</p>
 <footer id="open-on-gh">Found a bug? <a href="https://github.com/status-im/nim-json-rpc/edit/master/docs/src/overview.md">Edit this page on GitHub.</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="establishing-a-json-rpc-connection"><a class="header" href="#establishing-a-json-rpc-connection">Establishing a JSON-RPC connection</a></h1>
+<h2 id="transports"><a class="header" href="#transports">Transports</a></h2>
 <p>A JSON-RPC connection communicates over an existing transport, such as HTTP, Sockets and pipes, and Websockets:</p>
 <ul>
 <li>HTTP POST: unidirectional, one request/response pair per call.</li>
@@ -574,7 +575,6 @@ proc main() {.async.} =
 
   let resp6 = await client.`🙂`("Daisy")
   doAssert resp6 == "🙂 Daisy"
-
 
   let batch = client.prepareBatch()
   batch.hello("Daisy")
