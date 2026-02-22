@@ -191,7 +191,7 @@
 <pre><code class="language-nim">let resp1 = await client.hello("Daisy")
 </code></pre>
 <p>The <code>createRpcSigs</code> macro accepts the path of a file containing a list of forward proc declarations and it generates the client RPCs of it:</p>
-<pre><code class="language-nim">const sigsFilePath = currentSourcePath().parentDir / "client_sigs.nim"
+<pre><code class="language-nim">const sigsFilePath = currentSourcePath().parentDir / "client_sigs.nim1"
 createRpcSigs(RpcClient, sigsFilePath, RpcConv)
 </code></pre>
 <p>The <code>createSingleRpcSig</code> macro accepts a single forward proc declaration and an alias. The alias can be used to invoke the RPC method:</p>
