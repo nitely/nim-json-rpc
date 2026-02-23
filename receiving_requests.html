@@ -191,8 +191,8 @@
   "🙂 " &amp; input
 </code></pre>
 <p>When the procedure return type is not specified, <code>JsonNode</code> is implicitly used. To avoid returning a result, <code>void</code> can be used instead:</p>
-<pre><code class="language-nim">proc notif(): void =
-  echo "notified"
+<pre><code class="language-nim">proc empty(): void =
+  echo "nothing"
 </code></pre>
 <p>Compiling with <code>-d:nimDumpRpcs</code> will show the output code for the RPC call. To see the output of the <code>async</code> generation, add <code>-d:nimDumpAsync</code>.</p>
 <h2 id="parameter-name-and-placement"><a class="header" href="#parameter-name-and-placement">Parameter name and placement</a></h2>

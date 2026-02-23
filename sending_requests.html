@@ -232,7 +232,7 @@ doAssert RpcConv.decode(r[1].result, string) == "🙂 Daisy"
 </code></pre>
 <h2 id="sending-a-notification"><a class="header" href="#sending-a-notification">Sending a notification</a></h2>
 <p>A notification can be sent for fire and forget method invocations. As mentioned earlier, the method response is not returned, and the client is not notified about server errors:</p>
-<pre><code class="language-nim">await client.notify("notif", RequestParamsTx())
+<pre><code class="language-nim">await client.notify("empty", RequestParamsTx())
 </code></pre>
 <h2 id="exception-handling"><a class="header" href="#exception-handling">Exception handling</a></h2>
 <p>RPC methods may throw exceptions. The RPC client should be prepared to handle these exceptions.</p>

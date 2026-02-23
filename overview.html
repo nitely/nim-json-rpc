@@ -175,7 +175,7 @@
 <h2 id="protocol-overview"><a class="header" href="#protocol-overview">Protocol overview</a></h2>
 <p>JSON-RPC is a two-party, peer-to-peer based protocol by which one party can request a method's invocation of the other party, and optionally receive a response from the server with the result of that invocation.</p>
 <p>Either peer may send RPC requests to the other peer. Both acting as server and client at the same time.</p>
-<p>A common pattern is that one party tends to issue most of the RPC requests, while the other party may occasionally transmit requests as a "call back" to the client for raising notifications. This is merely an artifact of architectural expediency for many applications and not due to any design of the JSON-RPC protocol, or this library's particular implementation of it.</p>
+<p>A common pattern is that one peer sends most of the RPC requests, while the other peer only occasionally sends requests back to the client to deliver notifications. This pattern is common in many applications because of how they are structured, not because of the JSON-RPC protocol itself or because of how this library implements it.</p>
 <h2 id="json_rpcs-role"><a class="header" href="#json_rpcs-role">json_rpc's role</a></h2>
 <p><code>json_rpc</code> is a Nim library that implements the JSON-RPC protocol to easily send and receive RPC requests. It works on any transport (e.g. HTTP, Sockets, WebSocket). It is designed to automatically generate marshalling and parameter checking code based on the RPC parameter types.</p>
 <h2 id="security"><a class="header" href="#security">Security</a></h2>

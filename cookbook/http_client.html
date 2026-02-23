@@ -183,7 +183,7 @@ createRpcSigsFromNim(RpcClient, RpcConv):
   proc hello(input: string): string
   proc bye(input: string): string
   proc `🙂`(input: string): string
-  proc notif()
+  proc empty()
   proc justHello(): string
   proc teaPot()
 
@@ -228,7 +228,7 @@ proc main() {.async.} =
   doAssert r[1].error.isNone
   doAssert RpcConv.decode(r[1].result, string) == "🙂 Daisy"
 
-  await client.notify("notif", RequestParamsTx())
+  await client.notify("empty", RequestParamsTx())
 
   try:
     discard await client.teaPot()
