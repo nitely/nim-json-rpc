@@ -196,7 +196,7 @@ createRpcSigs(RpcClient, sigsFilePath, RpcConv)
 </code></pre>
 <p>The <code>createSingleRpcSig</code> macro accepts a single forward proc declaration and an alias. The alias can be used to invoke the RPC method:</p>
 <pre><code class="language-nim">createSingleRpcSig(RpcClient, "sayBye", RpcConv):
-  proc bye(name: string): string
+  proc bye(input: string): string
 </code></pre>
 <p>The <code>createRpcSigsFromString</code> macro accepts a string containing a list of forward proc declarations and it generates the client RPCs:</p>
 <pre><code class="language-nim">const rpcClientDefs = staticRead(sigsFilePath)

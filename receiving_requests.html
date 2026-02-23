@@ -175,7 +175,7 @@
 <p>Before receiving any request, you should have already <a href="./connecting.html">established a connection</a>.</p>
 <p>When a request is received, the router matches it to a server method that was previously registered with a matching name. If no matching server method can be found the request is dropped, and an error is returned to the client if the client requested a response.</p>
 <p>When an RPC-invoked server method throws an exception, the server will handle the exception and (when applicable) send an error response to the client with a description of the failure.</p>
-<p>JSON-RPC is an inherently asynchronous protocol. Multiple concurrent requests are allowed. Methods are invoked as the requests are processed, even while prior requests are still running. Hence, responses may end up being sent unordered.</p>
+<p>JSON-RPC is an inherently asynchronous protocol. Multiple concurrent requests are allowed. Methods are invoked as the requests are processed, even while prior requests are still running.</p>
 <h2 id="registering-methods"><a class="header" href="#registering-methods">Registering methods</a></h2>
 <p>The <code>rpc</code> macro accepts a list of proc definitions which are turned into async procedures and registered as RPC methods. Procedure overload is not supported. A format flavor supporting the parameters and return type must be set. The <code>RpcConv</code> defined in the <a href="./format_conversion.html">flavors section</a> is used in the following example:</p>
 <pre><code class="language-nim">srv.rpc(RpcConv):
@@ -183,14 +183,14 @@
     "Hello " &amp; input
 </code></pre>
 <p>When <a href="https://www.jsonrpc.org/specification#parameter_structures">named parameters</a> are used, <a href="https://github.com/status-im/nim-serialization?tab=readme-ov-file#custom-serialization-of-user-defined-types"><code>serializedFieldName</code></a> can be used to customize the field name:</p>
-<pre><code class="language-nim">proc bye(input {.serializedFieldName: "name".}: string): string =
+<pre><code class="language-nim">proc bye(input {.serializedFieldName: "user-name".}: string): string =
   "Bye " &amp; input
 </code></pre>
 <p>Wrapping the method name in backticks allows any character:</p>
 <pre><code class="language-nim">proc `🙂`(input: string): string =
   "🙂 " &amp; input
 </code></pre>
-<p>When the procedure return type is not specified, <code>JsonNode</code> is implicitly used. To avoid returning a response, <code>void</code> can be used instead:</p>
+<p>When the procedure return type is not specified, <code>JsonNode</code> is implicitly used. To avoid returning a result, <code>void</code> can be used instead:</p>
 <pre><code class="language-nim">proc notif(): void =
   echo "notified"
 </code></pre>
