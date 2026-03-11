@@ -121,7 +121,7 @@ proc callOnProcessMessage*(
 
 const defaultRouter = default(RpcRouter)
 
-proc processMessageResponse*(
+proc processMessageResponse(
     client: RpcConnection, line: seq[byte]
 ) {.raises: [SerializationError, JsonRpcError].} =
   let batch = JrpcSys.decode(line, ResponseBatchRx)
@@ -146,9 +146,12 @@ proc processMessageResponse*(
 
 proc processMessage*(
     client: RpcConnection, line: seq[byte]
-): Future[seq[byte]] {.raises: [JsonRpcError].} =
+): Future[seq[byte]].Raising([]) {.raises: [JsonRpcError].} =
   template makeResponse(res: seq[byte]): untyped =
-    let ret = newFuture[seq[byte]]("processMessage")
+    let ret = Future[seq[byte]].Raising([]).init(
+      "processMessage", {FutureFlag.OwnCancelSchedule}
+    )
+    ret.cancelCallback = nil
     ret.complete(res)
     ret
 
