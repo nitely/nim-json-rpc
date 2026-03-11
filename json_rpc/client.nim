@@ -151,7 +151,6 @@ proc processMessage*(
     let ret = Future[seq[byte]].Raising([]).init(
       "processMessage", {FutureFlag.OwnCancelSchedule}
     )
-    ret.cancelCallback = nil
     ret.complete(res)
     ret
 
