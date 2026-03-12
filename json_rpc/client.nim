@@ -128,7 +128,6 @@ proc processMessageResponse(
   let id = case batch.kind
   of rbkMany:
     var curr = RequestId(kind: riNumber, num: int.low)
-    var idx = 0
     for i in 0 ..< batch.many.len:
       let id = batch.many[i].id
       if id.kind == riNumber and id.num >= curr.num:
