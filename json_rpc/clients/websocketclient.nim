@@ -117,6 +117,7 @@ proc processMessages(client: RpcWebSocketClient) {.async: (raises: []).} =
       let resp = try:
         await client.processMessage(data)
       except JsonRpcError as exc:
+        # XXX this seems bad but it was v0.5.4 behavior
         client.clearPending(exc)
         continue
 

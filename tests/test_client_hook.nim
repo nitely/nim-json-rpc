@@ -304,6 +304,8 @@ suite "test ws http client":
       let res = waitFor client.get_Banana(11)
       discard res
 
+  # XXX client.close() causes a "Incomplete data sent or received"
+  #     it's the same in HEAD and v0.5.4
   waitFor client.close()
   server.stop()
   waitFor server.closeWait()

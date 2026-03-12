@@ -239,7 +239,12 @@ proc processMessages(client: RpcSocketClient) {.async: (raises: []).} =
       if not fallback:
         continue
 
-      let resp = await client.processMessage(data)
+      let resp = try:
+        await client.processMessage(data)
+      except JsonRpcError as exc:
+        # XXX this seems bad but it was v0.5.4 behavior
+        client.clearPending(exc)
+        continue
 
       if resp.len > 0:
         await client.framing.sendMsg(client.transport, resp)
