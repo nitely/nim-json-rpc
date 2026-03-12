@@ -114,7 +114,11 @@ proc processMessages(client: RpcWebSocketClient) {.async: (raises: []).} =
       if not fallback:
         continue
 
-      let resp = await client.processMessage(data)
+      let resp = try:
+        await client.processMessage(data)
+      except JsonRpcError as exc:
+        client.clearPending(exc)
+        continue
 
       if resp.len > 0:
         await client.transport.send(resp, Opcode.Binary)
