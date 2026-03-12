@@ -288,7 +288,7 @@ proc callBatch*(
       debug "JSON-RPC batch request failed", err = exc.msg, remote = client.remote
       raise exc
 
-  let id = calls[0].id.valueOr:
+  let id = calls[^1].id.valueOr:
     raiseAssert "missing id"
   doAssert id.kind == riNumber
   let req = client.request(requestData, id.num)
