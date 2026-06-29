@@ -198,7 +198,7 @@ proc setupServer(srv: RpcServer) =
     proc justHello(): string =
       "Hello"
 
-    proc teaPot(): void =
+    proc teaPot(): void {.raises: [ApplicationError].} =
       raise (ref ApplicationError)(
         code: 418, data: Opt.none(JsonString), msg: "I'm a teapot"
       )

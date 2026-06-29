@@ -181,7 +181,7 @@
 <p>The RPC server can return errors to the client by throwing an exception from the RPC method. If the RPC method was invoked using a JSON-RPC notification, the client is not expecting any response and the exception thrown from the server will be swallowed.</p>
 <p>The RPC method can raise an <code>ApplicationError</code> with a specific <code>code</code>, <code>data</code>, and <code>msg</code> (message). Any other exception thrown from an RPC method is assigned -32000 (Server error) for the JSON-RPC error <code>code</code> property. The exception <code>msg</code> field is used as the JSON-RPC error <code>data</code> property.</p>
 <p>RPC method error example:</p>
-<pre><code class="language-nim">proc teaPot(): void =
+<pre><code class="language-nim">proc teaPot(): void {.raises: [ApplicationError].} =
   raise (ref ApplicationError)(
     code: 418, data: Opt.none(JsonString), msg: "I'm a teapot"
   )
