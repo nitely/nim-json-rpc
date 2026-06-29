@@ -142,6 +142,30 @@
           <li><a class="reference external"
           data-doc-search-tag="jrpc_sys: template automaticSerialization(F: type JrpcSys; T: distinct type; enable: static[bool])" href="private/jrpc_sys.html#automaticSerialization.t%2CtypeJrpcSys%2C%2Cstatic%5Bbool%5D">jrpc_sys: template automaticSerialization(F: type JrpcSys; T: distinct type; enable: static[bool])</a></li>
           </ul></dd>
+<dt><a name="BidiMessage" href="#BidiMessage"><span>BidiMessage:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="jrpc_sys: object BidiMessage" href="private/jrpc_sys.html#BidiMessage">jrpc_sys: object BidiMessage</a></li>
+          </ul></dd>
+<dt><a name="BidiMessageKind" href="#BidiMessageKind"><span>BidiMessageKind:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="jrpc_sys: enum BidiMessageKind" href="private/jrpc_sys.html#BidiMessageKind">jrpc_sys: enum BidiMessageKind</a></li>
+          </ul></dd>
+<dt><a name="BidiMessageRequestError" href="#BidiMessageRequestError"><span>BidiMessageRequestError:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="jrpc_sys: object BidiMessageRequestError" href="private/jrpc_sys.html#BidiMessageRequestError">jrpc_sys: object BidiMessageRequestError</a></li>
+          </ul></dd>
+<dt><a name="BidiMessageResponseError" href="#BidiMessageResponseError"><span>BidiMessageResponseError:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="jrpc_sys: object BidiMessageResponseError" href="private/jrpc_sys.html#BidiMessageResponseError">jrpc_sys: object BidiMessageResponseError</a></li>
+          </ul></dd>
+<dt><a name="bmRequest" href="#bmRequest"><span>bmRequest:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="jrpc_sys: BidiMessageKind.bmRequest" href="private/jrpc_sys.html#bmRequest">jrpc_sys: BidiMessageKind.bmRequest</a></li>
+          </ul></dd>
+<dt><a name="bmResponse" href="#bmResponse"><span>bmResponse:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="jrpc_sys: BidiMessageKind.bmResponse" href="private/jrpc_sys.html#bmResponse">jrpc_sys: BidiMessageKind.bmResponse</a></li>
+          </ul></dd>
 <dt><a name="call" href="#call"><span>call:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="client: proc call(client: RpcClient; name: string; params: JsonNode): InternalRaisesFuture[
@@ -157,12 +181,6 @@
           data-doc-search-tag="client: proc call(client: RpcClient; name: string; params: RequestParamsTx): InternalRaisesFuture[
     JsonString, (CancelledError, JsonRpcError)]" href="client.html#call%2CRpcClient%2Cstring%2CRequestParamsTx">client: proc call(client: RpcClient; name: string; params: RequestParamsTx): InternalRaisesFuture[
     JsonString, (CancelledError, JsonRpcError)]</a></li>
-          </ul></dd>
-<dt><a name="callBatch" href="#callBatch"><span>callBatch:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="client: proc callBatch(client: RpcClient; calls: seq[RequestTx]): InternalRaisesFuture[
-    seq[ResponseRx2], (CancelledError, JsonRpcError)]" href="client.html#callBatch%2CRpcClient%2Cseq%5BRequestTx%5D">client: proc callBatch(client: RpcClient; calls: seq[RequestTx]): InternalRaisesFuture[
-    seq[ResponseRx2], (CancelledError, JsonRpcError)]</a></li>
           </ul></dd>
 <dt><a name="callOnProcessMessage" href="#callOnProcessMessage"><span>callOnProcessMessage:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -486,11 +504,13 @@
           </ul></dd>
 <dt><a name="maybeWrapServerResult" href="#maybeWrapServerResult"><span>maybeWrapServerResult:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="server_handler_wrapper: template maybeWrapServerResult(Format, resFut): auto" href="private/server_handler_wrapper.html#maybeWrapServerResult.t%2C%2C">server_handler_wrapper: template maybeWrapServerResult(Format, resFut): auto</a></li>
+          data-doc-search-tag="server_handler_wrapper: template maybeWrapServerResult(Format, handlerRes): auto" href="private/server_handler_wrapper.html#maybeWrapServerResult.t%2C%2C">server_handler_wrapper: template maybeWrapServerResult(Format, handlerRes): auto</a></li>
           </ul></dd>
 <dt><a name="meth" href="#meth"><span>meth:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="jrpc_sys: proc meth(rx: RequestRx | RequestRx2): string" href="private/jrpc_sys.html#meth">jrpc_sys: proc meth(rx: RequestRx | RequestRx2): string</a></li>
+          data-doc-search-tag="jrpc_sys: proc meth(rx: RequestRx): Opt[string]" href="private/jrpc_sys.html#meth%2CRequestRx">jrpc_sys: proc meth(rx: RequestRx): Opt[string]</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="jrpc_sys: proc meth(rx: RequestRx2): string" href="private/jrpc_sys.html#meth%2CRequestRx2">jrpc_sys: proc meth(rx: RequestRx2): string</a></li>
           </ul></dd>
 <dt><a name="METHOD_NOT_FOUND" href="#METHOD_NOT_FOUND"><span>METHOD_NOT_FOUND:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -698,6 +718,10 @@
 <li><a class="reference external"
           data-doc-search-tag="shared_wrapper: proc paramsTx(params: JsonNode; Format: type SerializationFormat): RequestParamsTx" href="private/shared_wrapper.html#paramsTx%2CJsonNode%2CtypeSerializationFormat">shared_wrapper: proc paramsTx(params: JsonNode; Format: type SerializationFormat): RequestParamsTx</a></li>
           </ul></dd>
+<dt><a name="parseResponse" href="#parseResponse"><span>parseResponse:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="client: proc parseResponse(payload: openArray[byte]; T: type): T:type" href="client.html#parseResponse%2CopenArray%5Bbyte%5D%2Ctype">client: proc parseResponse(payload: openArray[byte]; T: type): T:type</a></li>
+          </ul></dd>
 <dt><a name="PreferredOutputType" href="#PreferredOutputType"><span>PreferredOutputType:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="jsonmarshal: template PreferredOutputType(T`gensym1: type JrpcConv): type" href="jsonmarshal.html#PreferredOutputType.t%2CtypeJrpcConv">jsonmarshal: template PreferredOutputType(T`gensym1: type JrpcConv): type</a></li>
@@ -710,9 +734,9 @@
           </ul></dd>
 <dt><a name="processMessage" href="#processMessage"><span>processMessage:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="client: proc processMessage(client: RpcConnection; line: seq[byte]): InternalRaisesFuture[
-    seq[byte], void]" href="client.html#processMessage%2CRpcConnection%2Cseq%5Bbyte%5D">client: proc processMessage(client: RpcConnection; line: seq[byte]): InternalRaisesFuture[
-    seq[byte], void]</a></li>
+          data-doc-search-tag="client: proc processMessage(client: RpcConnection; line: seq[byte]): Future[seq[byte]].Raising(
+    [])" href="client.html#processMessage%2CRpcConnection%2Cseq%5Bbyte%5D">client: proc processMessage(client: RpcConnection; line: seq[byte]): Future[seq[byte]].Raising(
+    [])</a></li>
           </ul></dd>
 <dt><a name="processRpcSigs" href="#processRpcSigs"><span>processRpcSigs:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -740,6 +764,8 @@
 <li><a class="reference external"
           data-doc-search-tag="jrpc_sys: proc readValue(r: var JsonReader; value: var Opt[RequestId])" href="private/jrpc_sys.html#readValue%2CJsonReader%2COpt%5BRequestId%5D">jrpc_sys: proc readValue(r: var JsonReader; value: var Opt[RequestId])</a></li>
           <li><a class="reference external"
+          data-doc-search-tag="jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var BidiMessage)" href="private/jrpc_sys.html#readValue%2CJsonReader%5BJrpcSys%5D%2CBidiMessage">jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var BidiMessage)</a></li>
+          <li><a class="reference external"
           data-doc-search-tag="jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var JsonRPC2)" href="private/jrpc_sys.html#readValue%2CJsonReader%5BJrpcSys%5D%2CJsonRPC2">jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var JsonRPC2)</a></li>
           <li><a class="reference external"
           data-doc-search-tag="jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var RequestBatchRx)" href="private/jrpc_sys.html#readValue%2CJsonReader%5BJrpcSys%5D%2CRequestBatchRx">jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var RequestBatchRx)</a></li>
@@ -747,6 +773,8 @@
           data-doc-search-tag="jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var RequestId)" href="private/jrpc_sys.html#readValue%2CJsonReader%5BJrpcSys%5D%2CRequestId">jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var RequestId)</a></li>
           <li><a class="reference external"
           data-doc-search-tag="jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var RequestParamsRx)" href="private/jrpc_sys.html#readValue%2CJsonReader%5BJrpcSys%5D%2CRequestParamsRx">jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var RequestParamsRx)</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var ResponseBatchRx)" href="private/jrpc_sys.html#readValue%2CJsonReader%5BJrpcSys%5D%2CResponseBatchRx">jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var ResponseBatchRx)</a></li>
           <li><a class="reference external"
           data-doc-search-tag="jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var ResponseRx)" href="private/jrpc_sys.html#readValue%2CJsonReader%5BJrpcSys%5D%2CResponseRx">jrpc_sys: proc readValue(r: var JsonReader[JrpcSys]; val: var ResponseRx)</a></li>
           <li><a class="reference external"
@@ -777,16 +805,6 @@
 <dt><a name="ReqRespHeader" href="#ReqRespHeader"><span>ReqRespHeader:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="jrpc_sys: object ReqRespHeader" href="private/jrpc_sys.html#ReqRespHeader">jrpc_sys: object ReqRespHeader</a></li>
-          </ul></dd>
-<dt><a name="request" href="#request"><span>request:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="socketclient: method request(client: RpcSocketClient; reqData: seq[byte]): InternalRaisesFuture[
-    seq[byte], (CancelledError, JsonRpcError)]" href="clients/socketclient.html#request.e%2CRpcSocketClient%2Cseq%5Bbyte%5D">socketclient: method request(client: RpcSocketClient; reqData: seq[byte]): InternalRaisesFuture[
-    seq[byte], (CancelledError, JsonRpcError)]</a></li>
-          <li><a class="reference external"
-          data-doc-search-tag="websocketclient: method request(client: RpcWebSocketClient; reqData: seq[byte]): InternalRaisesFuture[
-    seq[byte], (CancelledError, JsonRpcError)]" href="clients/websocketclient.html#request.e%2CRpcWebSocketClient%2Cseq%5Bbyte%5D">websocketclient: method request(client: RpcWebSocketClient; reqData: seq[byte]): InternalRaisesFuture[
-    seq[byte], (CancelledError, JsonRpcError)]</a></li>
           </ul></dd>
 <dt><a name="RequestBatchRx" href="#RequestBatchRx"><span>RequestBatchRx:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -837,6 +855,10 @@
           data-doc-search-tag="utils: iterator resolveIP(addresses: openArray[string]): TransportAddress" href="private/utils.html#resolveIP.i%2CopenArray%5Bstring%5D">utils: iterator resolveIP(addresses: openArray[string]): TransportAddress</a></li>
           <li><a class="reference external"
           data-doc-search-tag="utils: iterator resolveIP(address: string; port: Port): TransportAddress" href="private/utils.html#resolveIP.i%2Cstring%2CPort">utils: iterator resolveIP(address: string; port: Port): TransportAddress</a></li>
+          </ul></dd>
+<dt><a name="ResponseBatchRx" href="#ResponseBatchRx"><span>ResponseBatchRx:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="jrpc_sys: object ResponseBatchRx" href="private/jrpc_sys.html#ResponseBatchRx">jrpc_sys: object ResponseBatchRx</a></li>
           </ul></dd>
 <dt><a name="ResponseError" href="#ResponseError"><span>ResponseError:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1100,7 +1122,7 @@
           </ul></dd>
 <dt><a name="withPendingFut" href="#withPendingFut"><span>withPendingFut:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="client: template withPendingFut(client, fut, body: untyped): untyped" href="client.html#withPendingFut.t%2Cuntyped%2Cuntyped%2Cuntyped">client: template withPendingFut(client, fut, body: untyped): untyped</a></li>
+          data-doc-search-tag="client: template withPendingFut(client, fut, id, body: untyped): untyped" href="client.html#withPendingFut.t%2Cuntyped%2Cuntyped%2Cuntyped%2Cuntyped">client: template withPendingFut(client, fut, id, body: untyped): untyped</a></li>
           </ul></dd>
 <dt><a name="withWriter" href="#withWriter"><span>withWriter:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1112,9 +1134,9 @@
           </ul></dd>
 <dt><a name="wrapServerHandler" href="#wrapServerHandler"><span>wrapServerHandler:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="server_handler_wrapper: proc wrapServerHandler(methName: string;
-                  params, procBody, procWrapper, formatType: NimNode): NimNode" href="private/server_handler_wrapper.html#wrapServerHandler%2Cstring%2CNimNode%2CNimNode%2CNimNode%2CNimNode">server_handler_wrapper: proc wrapServerHandler(methName: string;
-                  params, procBody, procWrapper, formatType: NimNode): NimNode</a></li>
+          data-doc-search-tag="server_handler_wrapper: proc wrapServerHandler(methName: string; params, procBody, procWrapper, procPragmas,
+                                    formatType: NimNode): NimNode" href="private/server_handler_wrapper.html#wrapServerHandler%2Cstring%2CNimNode%2CNimNode%2CNimNode%2CNimNode%2CNimNode">server_handler_wrapper: proc wrapServerHandler(methName: string; params, procBody, procWrapper, procPragmas,
+                                    formatType: NimNode): NimNode</a></li>
           </ul></dd>
 <dt><a name="writeNotification" href="#writeNotification"><span>writeNotification:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1158,7 +1180,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-06-29 20:00:43 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-06-29 20:10:07 UTC</small>
       </div>
     </div>
   </div>
