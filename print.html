@@ -187,7 +187,7 @@
 <li><a href="./connecting.html">Establishing a JSON-RPC connection</a></li>
 <li><a href="./receiving_requests.html">Receiving a JSON-RPC request</a></li>
 <li><a href="./sending_requests.html">Sending a JSON-RPC request</a></li>
-<li><a href="./remote_targets.html">Adding Remote RPC Targets</a></li>
+<li><a href="./rpc_proxy_server.html">RPC Proxy Server</a></li>
 <li><a href="./exceptions.html">Throwing and handling exceptions</a></li>
 <li><a href="./format_conversion.html">Format conversion</a></li>
 <li><a href="./testability.html">Testability</a></li>
@@ -363,38 +363,32 @@ doAssert RpcConv.decode(r[1].result, string) == "🙂 Daisy"
 <h2 id="exception-handling"><a class="header" href="#exception-handling">Exception handling</a></h2>
 <p>RPC methods may throw exceptions. The RPC client should be prepared to handle these exceptions.</p>
 <p><a href="./exceptions.html">Learn more about throwing and handling exceptions.</a></p>
-<footer id="open-on-gh">Found a bug? <a href="https://github.com/status-im/nim-json-rpc/edit/master/docs/src/sending_requests.md">Edit this page on GitHub.</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="adding-remote-rpc-targets"><a class="header" href="#adding-remote-rpc-targets">Adding Remote RPC Targets</a></h1>
-<p>There are scenarios where users may need to add remote RPC targets to facilitate communication between two endpoints that have no direct RPC connection channel. Consider the following 3 endpoints:</p>
-<ul>
-<li>client</li>
-<li>server</li>
-<li>remote</li>
-</ul>
-<p>There is a direct RPC connection between client and server, and server and remote. However, client and remote may need to send messages to each other as well. To do so, users can use an RPC proxy server.</p>
+<footer id="open-on-gh">Found a bug? <a href="https://github.com/status-im/nim-json-rpc/edit/master/docs/src/sending_requests.md">Edit this page on GitHub.</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="rpc-proxy-server"><a class="header" href="#rpc-proxy-server">RPC Proxy Server</a></h1>
+<p>A proxy server can register methods which will be served by another server. In this case there will be a connection between <code>client</code>-<code>proxy-server</code> and <code>proxy-server</code>-<code>server</code>. Some methods can be served directly by the <code>proxy-server</code>, while the proxy methods are forwarded to the <code>server</code>.</p>
 <h2 id="create-a-proxy-server"><a class="header" href="#create-a-proxy-server">Create a proxy server</a></h2>
-<p>The proxy server only supports HTTP to serve clients. It supports HTTP and Websockets to connect to the remote server:</p>
+<p>The proxy-server only supports HTTP to serve clients. It supports HTTP and Websockets to connect to the server:</p>
 <p>HTTP:</p>
 <pre><code class="language-nim">var proxy = RpcProxy.new(["127.0.0.1:0"], getHttpClientConfig(srvUrl))
 </code></pre>
 <p>Websockets:</p>
 <pre><code class="language-nim">var proxy = RpcProxy.new(["127.0.0.1:0"], getWebSocketClientConfig("ws://" &amp; $srv.localAddress()))
 </code></pre>
-<h2 id="registering-remote-target-methods"><a class="header" href="#registering-remote-target-methods">Registering remote target methods</a></h2>
-<p>The client can only make a call to the remote endpoint if the proxy (what's in the middle) has registered the remote RPC method:</p>
+<h2 id="registering-proxy-methods"><a class="header" href="#registering-proxy-methods">Registering proxy methods</a></h2>
+<p>The client can only make a call to the server endpoint if the proxy (what's in the middle) has registered the RPC proxy method:</p>
 <pre><code class="language-nim">proxy.registerProxyMethod("hello")
 </code></pre>
 <h2 id="registering-methods-1"><a class="header" href="#registering-methods-1">Registering methods</a></h2>
-<p>The proxy server can register its own RPC methods:</p>
+<p>The proxy-server can register its own RPC methods:</p>
 <pre><code class="language-nim">proxy.rpc(RpcConv):
   proc bye(input: string): string =
     "Proxy Bye " &amp; input
 </code></pre>
 <h2 id="start-the-proxy-server"><a class="header" href="#start-the-proxy-server">Start the proxy server</a></h2>
-<p>After registering the RPC methods, the server can start serving clients:</p>
+<p>After registering the RPC methods, the proxy-server can start serving clients:</p>
 <pre><code class="language-nim">await proxy.start()
 </code></pre>
 <p>Then usually <code>runForever()</code> or <code>waitFor</code> a program termination signal <code>waitSignal(SIGINT)</code>. This will run the Chronos async event loop until the program is terminated.</p>
-<footer id="open-on-gh">Found a bug? <a href="https://github.com/status-im/nim-json-rpc/edit/master/docs/src/remote_targets.md">Edit this page on GitHub.</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="throwing-and-handling-exceptions"><a class="header" href="#throwing-and-handling-exceptions">Throwing and handling exceptions</a></h1>
+<footer id="open-on-gh">Found a bug? <a href="https://github.com/status-im/nim-json-rpc/edit/master/docs/src/rpc_proxy_server.md">Edit this page on GitHub.</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="throwing-and-handling-exceptions"><a class="header" href="#throwing-and-handling-exceptions">Throwing and handling exceptions</a></h1>
 <p>The JSON-RPC protocol allows for server methods to return errors to the client instead of a result, except when the client invoked the method as a notification.</p>
 <p>The <a href="https://www.jsonrpc.org/specification#response_object">structure JSON-RPC defines for errors</a> includes an error code and a message.</p>
 <p>Error codes -32768 to -32000 are reserved for the protocol itself or for the library that implements it. The rest of the 32-bit integer range of the error code is available for the application to define. This error code is the best way for an RPC server to communicate a particular kind of error that the RPC client may use for controlling execution flow. For example the server may use an error code to indicate a conflict and another code to indicate a permission denied error. The client may check this error code and branch execution based on its value.</p>
