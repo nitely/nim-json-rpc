@@ -258,7 +258,7 @@ await srv.closeWait()
 </code></pre>
 <footer id="open-on-gh">Found a bug? <a href="https://github.com/status-im/nim-json-rpc/edit/master/docs/src/connecting.md">Edit this page on GitHub.</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="receiving-a-json-rpc-request"><a class="header" href="#receiving-a-json-rpc-request">Receiving a JSON-RPC request</a></h1>
 <p>Before receiving any request, you should have already <a href="./connecting.html">established a connection</a>.</p>
-<p>When a request is received, the router matches it to a server method that was previously registered with a matching name. If no matching server method can be found the request is dropped, and an error is returned to the client if the client requested a response.</p>
+<p>When a request is received, the router matches it to a server method by name. If no matching server method can be found the request is dropped, and an error is returned to the client if the client requested a response.</p>
 <p>When an RPC-invoked server method throws an exception, the server will handle the exception and (when applicable) send an error response to the client with a description of the failure.</p>
 <p>JSON-RPC is an inherently asynchronous protocol. Multiple concurrent requests are allowed. Methods are invoked as the requests are processed, even while prior requests are still running.</p>
 <h2 id="registering-methods"><a class="header" href="#registering-methods">Registering methods</a></h2>

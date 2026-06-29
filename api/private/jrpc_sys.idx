@@ -27,10 +27,10 @@ nim	rbkSingle	private/jrpc_sys.html#rbkSingle	ReBatchKind.rbkSingle		130
 nim	rbkMany	private/jrpc_sys.html#rbkMany	ReBatchKind.rbkMany		130
 nim	ReBatchKind	private/jrpc_sys.html#ReBatchKind	enum ReBatchKind		130
 nim	RequestBatchRx	private/jrpc_sys.html#RequestBatchRx	object RequestBatchRx		134
-nim	JrpcSys	private/jrpc_sys.html#JrpcSys	object JrpcSys		51
-nim	Reader	private/jrpc_sys.html#Reader.t,typeJrpcSys	template Reader(T`gensym1: type JrpcSys): type		52
-nim	Writer	private/jrpc_sys.html#Writer.t,typeJrpcSys	template Writer(T`gensym1: type JrpcSys): type		53
-nim	PreferredOutputType	private/jrpc_sys.html#PreferredOutputType.t,typeJrpcSys	template PreferredOutputType(T`gensym1: type JrpcSys): type		54
+nim	JrpcSys	private/jrpc_sys.html#JrpcSys	object JrpcSys		77
+nim	Reader	private/jrpc_sys.html#Reader.t,typeJrpcSys	template Reader(T`gensym1: type JrpcSys): type		78
+nim	Writer	private/jrpc_sys.html#Writer.t,typeJrpcSys	template Writer(T`gensym1: type JrpcSys): type		79
+nim	PreferredOutputType	private/jrpc_sys.html#PreferredOutputType.t,typeJrpcSys	template PreferredOutputType(T`gensym1: type JrpcSys): type		80
 nim	mimeType	private/jrpc_sys.html#mimeType.t,typeJrpcSys	template mimeType(T`gensym1: type JrpcSys): string		120
 nim	decode	private/jrpc_sys.html#decode.t,typeJrpcSys,JsonString,type,varargs[untyped]	template decode(Format: type JrpcSys; inputParam: JsonString; RecordType: type;\n       params: varargs[untyped]): auto		129
 nim	flavorUsesAutomaticObjectSerialization	private/jrpc_sys.html#flavorUsesAutomaticObjectSerialization.t,typeJrpcSys	template flavorUsesAutomaticObjectSerialization(T: type JrpcSys): bool		137
@@ -45,14 +45,14 @@ nim	typeAutoSerialize	private/jrpc_sys.html#typeAutoSerialize,typeJrpcSys,	proc 
 nim	automaticSerialization	private/jrpc_sys.html#automaticSerialization.t,typeJrpcSys,,static[bool]	template automaticSerialization(F: type JrpcSys; T: distinct type; enable: static[bool])		19
 nim	automaticPrimitivesSerialization	private/jrpc_sys.html#automaticPrimitivesSerialization.t,typeJrpcSys,static[bool]	template automaticPrimitivesSerialization(F: type JrpcSys; enable: static[bool])		21
 nim	automaticBuiltinSerialization	private/jrpc_sys.html#automaticBuiltinSerialization.t,typeJrpcSys,static[bool]	template automaticBuiltinSerialization(F: type JrpcSys; enable: static[bool])		152
-nim	readValue	private/jrpc_sys.html#readValue.t,,ReqRespHeader	template readValue(r`gensym6: var Reader(JrpcSys); value`gensym6: var TT`gensym6)		150
-nim	readValue	private/jrpc_sys.html#readValue.t,,RequestRx	template readValue(r`gensym10: var Reader(JrpcSys); value`gensym10: var TT`gensym10)		151
-nim	readValue	private/jrpc_sys.html#readValue.t,,RequestRx2	template readValue(r`gensym14: var Reader(JrpcSys); value`gensym14: var TT`gensym14)		152
-nim	writeValue	private/jrpc_sys.html#writeValue.t,,ParamDescNamed	template writeValue(w`gensym18: var Writer(JrpcSys); value`gensym18: TT`gensym18)		154
-nim	writeValue	private/jrpc_sys.html#writeValue.t,,RequestTx	template writeValue(w`gensym22: var Writer(JrpcSys); value`gensym22: TT`gensym22)		155
-nim	writeValue	private/jrpc_sys.html#writeValue.t,,ResponseTx	template writeValue(w`gensym26: var Writer(JrpcSys); value`gensym26: TT`gensym26)		156
-nim	readValue	private/jrpc_sys.html#readValue.t,,ResponseError	template readValue(r`gensym30: var Reader(JrpcSys); value`gensym30: var TT`gensym30)		78
-nim	writeValue	private/jrpc_sys.html#writeValue.t,,ResponseError	template writeValue(w`gensym30: var Writer(JrpcSys); value`gensym30: TT`gensym30)		158
+nim	readValue	private/jrpc_sys.html#readValue.t,,ReqRespHeader	template readValue(r`gensym8: var Reader(JrpcSys); value`gensym8: var TT`gensym8)		150
+nim	readValue	private/jrpc_sys.html#readValue.t,,RequestRx	template readValue(r`gensym12: var Reader(JrpcSys); value`gensym12: var TT`gensym12)		151
+nim	readValue	private/jrpc_sys.html#readValue.t,,RequestRx2	template readValue(r`gensym16: var Reader(JrpcSys); value`gensym16: var TT`gensym16)		152
+nim	writeValue	private/jrpc_sys.html#writeValue.t,,ParamDescNamed	template writeValue(w`gensym20: var Writer(JrpcSys); value`gensym20: TT`gensym20)		154
+nim	writeValue	private/jrpc_sys.html#writeValue.t,,RequestTx	template writeValue(w`gensym24: var Writer(JrpcSys); value`gensym24: TT`gensym24)		155
+nim	writeValue	private/jrpc_sys.html#writeValue.t,,ResponseTx	template writeValue(w`gensym28: var Writer(JrpcSys); value`gensym28: TT`gensym28)		156
+nim	readValue	private/jrpc_sys.html#readValue.t,,ResponseError	template readValue(r`gensym32: var Reader(JrpcSys); value`gensym32: var TT`gensym32)		104
+nim	writeValue	private/jrpc_sys.html#writeValue.t,,ResponseError	template writeValue(w`gensym32: var Writer(JrpcSys); value`gensym32: TT`gensym32)		158
 nim	hash	private/jrpc_sys.html#hash,RequestId	proc hash(x: RequestId): hashes.Hash		165
 nim	`$`	private/jrpc_sys.html#$,RequestId	proc `$`(x: RequestId): string		173
 nim	`==`	private/jrpc_sys.html#==,RequestId,RequestId	proc `==`(a, b: RequestId): bool		179
@@ -75,6 +75,6 @@ nim	writeNotification	private/jrpc_sys.html#writeNotification.t,,string,RequestP
 nim	withWriter	private/jrpc_sys.html#withWriter.t,typeJrpcSys,untyped,untyped	template withWriter(_: type JrpcSys; writer, body: untyped): seq[byte]		360
 nimgrp	writevalue	private/jrpc_sys.html#writeValue-procs-all	proc		219
 nimgrp	readvalue	private/jrpc_sys.html#readValue-procs-all	proc		203
-nimgrp	writevalue	private/jrpc_sys.html#writeValue-templates-all	template		91
-nimgrp	readvalue	private/jrpc_sys.html#readValue-templates-all	template		100
+nimgrp	writevalue	private/jrpc_sys.html#writeValue-templates-all	template		117
+nimgrp	readvalue	private/jrpc_sys.html#readValue-templates-all	template		126
 nimgrp	flavorenumrep	private/jrpc_sys.html#flavorEnumRep-templates-all	template		144
