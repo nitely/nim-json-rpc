@@ -261,7 +261,7 @@ await srv.closeWait()
 <p>When a request is received, the router matches it to a server method by name. If no matching server method can be found the request is dropped, and an error is returned to the client if the client requested a response.</p>
 <p>When an RPC-invoked server method throws an exception, the server will handle the exception and (when applicable) send an error response to the client with a description of the failure.</p>
 <p>JSON-RPC is an inherently asynchronous protocol. Multiple concurrent requests are allowed. Methods are invoked as the requests are processed, even while prior requests are still running.</p>
-<h2 id="request-format-flavor"><a class="header" href="#request-format-flavor">Request format flavor</a></h2>
+<h2 id="method-format-flavor"><a class="header" href="#method-format-flavor">Method format flavor</a></h2>
 <p>A <a href="./format_conversion.html">format flavor</a> to convert the request parameters and the response result to/from JSON must be created to use in the RPC methods:</p>
 <pre><code class="language-nim">createJsonFlavor RpcConv,
   automaticObjectSerialization = false,
