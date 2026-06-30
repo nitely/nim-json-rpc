@@ -187,7 +187,8 @@
   skipNullFields = true # Skip optional fields==null in Reader
 </code></pre>
 <h2 id="registering-methods"><a class="header" href="#registering-methods">Registering methods</a></h2>
-<p>The <code>rpc</code> macro accepts a list of proc definitions which are registered as RPC methods. Procedure overload is not supported:</p>
+<p>The <code>rpc</code> macro accepts a list of proc definitions which are registered as RPC methods. The procedures can be synchronous or async, both run within the async event loop. Procedure overload is not supported.</p>
+<p>Synchronous RPC methods are implemented as regular procs:</p>
 <pre><code class="language-nim">srv.rpc(RpcConv):
   proc hello(input: string): string =
     "Hello " &amp; input
