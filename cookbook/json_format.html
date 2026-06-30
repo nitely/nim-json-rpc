@@ -190,6 +190,29 @@ createJsonFlavor RpcConv,
   allowUnknownFields = true,
   skipNullFields = true # Skip optional fields==null in Reader
 
+type
+  UserInfo* = object
+    name*: string
+    bio*: string
+
+UserInfo.useDefaultSerializationIn RpcConv
+
+type
+  UploadData* = object
+    path*: string
+    public*: bool
+
+proc readValue*(
+    reader: var RpcConv.Reader, value: var UploadData
+) {.gcsafe, raises: [IOError, SerializationError].} =
+  let path = reader.readValue(string)
+  value = UploadData(path: path, public: false)
+
+proc writeValue*(
+    writer: var RpcConv.Writer, value: UploadData
+) {.gcsafe, raises: [IOError].} =
+  writer.writeValue value.path
+
 </code></pre>
 <footer id="open-on-gh">Found a bug? <a href="https://github.com/status-im/nim-json-rpc/edit/master/docs/src/cookbook/json_format.md">Edit this page on GitHub.</a></footer>
                     </main>

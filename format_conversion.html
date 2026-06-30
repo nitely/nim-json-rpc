@@ -185,9 +185,33 @@
   allowUnknownFields = true,
   skipNullFields = true # Skip optional fields==null in Reader
 </code></pre>
-<p>In the above configuration automatic object serialization is disabled. Enabling the default serialization for a given object can be done with <code>RpcConv.useDefaultSerializationFor(MyObject)</code>. This is to avoid unintentionally using the default for objects that define a custom serializer.</p>
+<h2 id="object-serialization"><a class="header" href="#object-serialization">Object serialization</a></h2>
+<p>In the above configuration automatic object serialization is disabled. This is to avoid unintentionally using the default serializer for objects that define a custom serializer. Object serialization can be enabled per object using <code>useDefaultSerializationIn</code>:</p>
+<pre><code class="language-nim">type
+  UserInfo* = object
+    name*: string
+    bio*: string
+
+UserInfo.useDefaultSerializationIn RpcConv
+</code></pre>
 <h2 id="custom-type-serialization"><a class="header" href="#custom-type-serialization">Custom type serialization</a></h2>
-<p>It is possible to provide a custom serializer for a given type creating <code>writeValue</code> and <code>readValue</code> functions.</p>
+<p>It is possible to provide a custom serializer for a given type creating <code>writeValue</code> and <code>readValue</code> functions:</p>
+<pre><code class="language-nim">type
+  UploadData* = object
+    path*: string
+    public*: bool
+
+proc readValue*(
+    reader: var RpcConv.Reader, value: var UploadData
+) {.gcsafe, raises: [IOError, SerializationError].} =
+  let path = reader.readValue(string)
+  value = UploadData(path: path, public: false)
+
+proc writeValue*(
+    writer: var RpcConv.Writer, value: UploadData
+) {.gcsafe, raises: [IOError].} =
+  writer.writeValue value.path
+</code></pre>
 <p><a href="https://status-im.github.io/nim-json-serialization/reference.html#custom-parsers-and-writers">Learn more about serialization in the nim-json-serialization documentation.</a></p>
 <footer id="open-on-gh">Found a bug? <a href="https://github.com/status-im/nim-json-rpc/edit/master/docs/src/format_conversion.md">Edit this page on GitHub.</a></footer>
                     </main>
