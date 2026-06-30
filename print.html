@@ -272,8 +272,8 @@ await srv.closeWait()
   "Bye " &amp; input
 </code></pre>
 <p>Wrapping the method name in backticks allows any character:</p>
-<pre><code class="language-nim">proc `🙂`(input: string): string =
-  "🙂 " &amp; input
+<pre><code class="language-nim">proc `👑`(input: string): string =
+  "👑 " &amp; input
 </code></pre>
 <p>When the procedure return type is not specified, <code>JsonNode</code> is implicitly used. To avoid returning a result, <code>void</code> can be used instead:</p>
 <pre><code class="language-nim">proc empty(): void =
@@ -311,7 +311,7 @@ await srv.closeWait()
   proc hello(input: string): string
 </code></pre>
 <p>Wrapping the method name in backticks allows any character:</p>
-<pre><code class="language-nim">proc `🙂`(input: string): string
+<pre><code class="language-nim">proc `👑`(input: string): string
 </code></pre>
 <p>The RPC method can be invoked using a client instance with a stablished connection:</p>
 <pre><code class="language-nim">let resp1 = await client.hello("Daisy")
@@ -346,7 +346,7 @@ createRpcSigsFromString(RpcClient, rpcClientDefs, RpcConv)
 <p>The <code>prepareBatch</code> client function can be used to batch requests and <code>send</code> them all at once:</p>
 <pre><code class="language-nim">let batch = client.prepareBatch()
 batch.hello("Daisy")
-batch.`🙂`("Daisy")
+batch.`👑`("Daisy")
 let batchRes = await batch.send()
 </code></pre>
 <p>The <code>send</code> return value is an optional result with either the sequence of RPC responses, or an error indicating there was an error processing the array of responses. Each response contains a <code>result</code> or an <code>error</code>. The result field is the JSON encoded RPC <code>result</code>. If the optional error field is set, it'll contain either an error message or the JSON encoded RPC <code>error</code> response:</p>
@@ -354,7 +354,7 @@ let batchRes = await batch.send()
 doAssert r[0].error.isNone
 doAssert RpcConv.decode(r[0].result, string) == "Hello Daisy"
 doAssert r[1].error.isNone
-doAssert RpcConv.decode(r[1].result, string) == "🙂 Daisy"
+doAssert RpcConv.decode(r[1].result, string) == "👑 Daisy"
 </code></pre>
 <h2 id="sending-a-notification"><a class="header" href="#sending-a-notification">Sending a notification</a></h2>
 <p>A notification can be sent for fire and forget method invocations. As mentioned earlier, the method response is not returned, and the client is not notified about server errors:</p>
@@ -495,8 +495,8 @@ proc setupServer(srv: RpcServer) =
     proc bye(input {.serializedFieldName: "user-name".}: string): string =
       "Bye " &amp; input
 
-    proc `🙂`(input: string): string =
-      "🙂 " &amp; input
+    proc `👑`(input: string): string =
+      "👑 " &amp; input
 
     proc empty(): void =
       echo "nothing"
@@ -538,7 +538,7 @@ import ./[rpc_format, http_server]
 createRpcSigsFromNim(RpcClient, RpcConv):
   proc hello(input: string): string
   proc bye(input: string): string
-  proc `🙂`(input: string): string
+  proc `👑`(input: string): string
   proc empty()
   proc justHello(): string
   proc teaPot()
@@ -571,18 +571,18 @@ proc main() {.async.} =
   let resp6 = await client.call("bye", %* {"user-name": "Daisy"}, RpcConv)
   doAssert RpcConv.decode(resp6, string) == "Bye Daisy"
 
-  let resp7 = await client.`🙂`("Daisy")
-  doAssert resp7 == "🙂 Daisy"
+  let resp7 = await client.`👑`("Daisy")
+  doAssert resp7 == "👑 Daisy"
 
   let batch = client.prepareBatch()
   batch.hello("Daisy")
-  batch.`🙂`("Daisy")
+  batch.`👑`("Daisy")
   let batchRes = await batch.send()
   let r = batchRes.tryGet()
   doAssert r[0].error.isNone
   doAssert RpcConv.decode(r[0].result, string) == "Hello Daisy"
   doAssert r[1].error.isNone
-  doAssert RpcConv.decode(r[1].result, string) == "🙂 Daisy"
+  doAssert RpcConv.decode(r[1].result, string) == "👑 Daisy"
 
   await client.notify("empty", RequestParamsTx())
 

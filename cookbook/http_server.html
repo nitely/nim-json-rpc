@@ -189,8 +189,8 @@ proc setupServer(srv: RpcServer) =
     proc bye(input {.serializedFieldName: "user-name".}: string): string =
       "Bye " &amp; input
 
-    proc `🙂`(input: string): string =
-      "🙂 " &amp; input
+    proc `👑`(input: string): string =
+      "👑 " &amp; input
 
     proc empty(): void =
       echo "nothing"
