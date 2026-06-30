@@ -175,7 +175,7 @@
 <p>The conversion to and from JSON is done using a <a href="https://status-im.github.io/nim-json-serialization/reference.html#flavors">nim-json-serialization format</a>. For each type used in the RPC method, a serialization declaration tells <code>json_rpc</code> how to convert it to JSON, either using defaults or by overriding <code>readValue</code> and <code>writeValue</code>.</p>
 <p><code>json_rpc</code> will recursively parse the Nim types in order to produce marshalling code. This marshalling code uses the types to check the incoming JSON fields to ensure they exist and are of the correct kind.</p>
 <p>The return type then performs the opposite process, converting Nim types to JSON for transport.</p>
-<h2 id="creating-a-json-flavor"><a class="header" href="#creating-a-json-flavor">Creating a JSON flavor</a></h2>
+<h2 id="creating-a-json-format-flavor"><a class="header" href="#creating-a-json-format-flavor">Creating a JSON format flavor</a></h2>
 <p>The <code>createJsonFlavor</code> API accepts a flavor name and serialization options. The flavor can be passed to RPC method APIs and it will be used to convert the parameters and return value. In the following example the flavor is named <code>RpcConv</code>:</p>
 <pre><code class="language-nim">createJsonFlavor RpcConv,
   automaticObjectSerialization = false,

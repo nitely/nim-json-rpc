@@ -186,6 +186,9 @@ proc setupServer(srv: RpcServer) =
     proc hello(input: string): string =
       "Hello " &amp; input
 
+    proc howdy(input: string): string {.async: (raises: []).} =
+      "Howdy " &amp; input
+
     proc bye(input {.serializedFieldName: "user-name".}: string): string =
       "Bye " &amp; input
 
