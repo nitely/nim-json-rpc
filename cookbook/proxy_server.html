@@ -194,7 +194,7 @@ proc startProxy*(srvUrl: string): Future[RpcProxy] {.async.} =
   await proxy.start()
   proxy
 
-proc stopProxy*(proxy: RpcProxy) {.async.} =
+proc stopProxy*(proxy: RpcProxy) {.async: (raises: []).} =
   await proxy.stop()
   await proxy.closeWait()
 
