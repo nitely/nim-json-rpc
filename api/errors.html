@@ -68,6 +68,8 @@
 <li><a class="reference" href="#JsonRpcError" title="JsonRpcError = object of CatchableError">JsonRpcError</a></li>
 <li><a class="reference" href="#RequestDecodeError" title="RequestDecodeError = object of JsonRpcError
   payload*: seq[byte]">RequestDecodeError</a></li>
+<li><a class="reference" href="#ResultDecodeError" title="ResultDecodeError = object of JsonRpcError
+  result*: JsonString">ResultDecodeError</a></li>
 <li><a class="reference" href="#RpcAddressUnresolvableError" title="RpcAddressUnresolvableError = object of JsonRpcError">RpcAddressUnresolvableError</a></li>
 <li><a class="reference" href="#RpcBindError" title="RpcBindError = object of JsonRpcError">RpcBindError</a></li>
 <li><a class="reference" href="#RpcPostError" title="RpcPostError = object of RpcTransportError">RpcPostError</a></li>
@@ -97,8 +99,8 @@
   <dd>
     
     Error to be raised by the application request handlers when the server needs to respond with a custom application error. The error code should be outside the range of -32768 to -32000. A custom JSON data object may be provided.
-    <a href="https://github.com/status-im/nim-json-rpc/tree/master/json_rpc/errors.nim#L45" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/status-im/nim-json-rpc/edit/devel/json_rpc/errors.nim#L45" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/status-im/nim-json-rpc/tree/master/json_rpc/errors.nim#L49" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/status-im/nim-json-rpc/edit/devel/json_rpc/errors.nim#L49" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -135,8 +137,8 @@
 </div>
 
     
-    <a href="https://github.com/status-im/nim-json-rpc/tree/master/json_rpc/errors.nim#L53" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/status-im/nim-json-rpc/edit/devel/json_rpc/errors.nim#L53" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/status-im/nim-json-rpc/tree/master/json_rpc/errors.nim#L57" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/status-im/nim-json-rpc/edit/devel/json_rpc/errors.nim#L57" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -169,6 +171,17 @@
     raised when fail to decode RequestRx
     <a href="https://github.com/status-im/nim-json-rpc/tree/master/json_rpc/errors.nim#L41" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/status-im/nim-json-rpc/edit/devel/json_rpc/errors.nim#L41" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+<div id="ResultDecodeError">
+  <dt><pre><a href="errors.html#ResultDecodeError"><span class="Identifier">ResultDecodeError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="errors.html#JsonRpcError"><span class="Identifier">JsonRpcError</span></a>
+  <span class="Identifier">result</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">JsonString</span></pre></dt>
+  <dd>
+    
+    raised when failing to decode the response result
+    <a href="https://github.com/status-im/nim-json-rpc/tree/master/json_rpc/errors.nim#L45" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/status-im/nim-json-rpc/edit/devel/json_rpc/errors.nim#L45" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -222,7 +235,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-06-30 03:33:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-07-02 19:15:11 UTC</small>
       </div>
     </div>
   </div>
