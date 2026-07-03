@@ -179,9 +179,9 @@
 <h2 id="json_rpcs-role"><a class="header" href="#json_rpcs-role">json_rpc's role</a></h2>
 <p><code>json_rpc</code> is a Nim library that implements the JSON-RPC protocol to easily send and receive RPC requests. It implements three main layers:</p>
 <ul>
-<li>Transports: HTTP, Sockets, and WebSocket.</li>
+<li>Transport: HTTP, Sockets, and WebSocket.</li>
 <li>Routing: matches a request to a server method by name, invokes it, and produces a response.</li>
-<li>DSL: the <code>rpc</code> macro registers server methods, and <code>createRpcSigs</code> generates the client method calls. It automatically generates marshalling and parameter checking code based on the RPC parameter types.</li>
+<li>DSL: the <code>rpc</code> macro registers server methods. The <code>createRpcSigs</code> macro creates the client method calls. It automatically generates marshalling and parameter checking code based on the RPC parameter types.</li>
 </ul>
 <h2 id="security"><a class="header" href="#security">Security</a></h2>
 <p>The fundamental feature of the JSON-RPC protocol is the ability to request code execution of another party, including passing data either direction that may influence code execution. Neither the JSON-RPC protocol nor this library attempts to address the applicable security risks entailed.</p>

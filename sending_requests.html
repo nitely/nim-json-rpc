@@ -187,10 +187,10 @@
 <p>Wrapping the method name in backticks allows any character:</p>
 <pre><code class="language-nim">proc `👑`(input: string): string
 </code></pre>
-<p>The RPC method can be invoked using a client instance with a stablished connection:</p>
+<p>The RPC method can be invoked using a client instance with a <a href="./connecting.html">established connection</a>:</p>
 <pre><code class="language-nim">let resp1 = await client.hello("Daisy")
 </code></pre>
-<p>The <code>createRpcSigs</code> macro accepts the path of a file containing a list of forward proc declarations and it generates the client RPCs of it:</p>
+<p>The <code>createRpcSigs</code> macro accepts the path of a file containing a list of forward proc declarations and it generates the client RPCs from it:</p>
 <pre><code class="language-nim">const sigsFilePath = currentSourcePath().parentDir / "client_sigs_def.nim"
 createRpcSigs(RpcClient, sigsFilePath, RpcConv)
 </code></pre>
@@ -203,7 +203,7 @@ createRpcSigs(RpcClient, sigsFilePath, RpcConv)
 createRpcSigsFromString(RpcClient, rpcClientDefs, RpcConv)
 </code></pre>
 <h2 id="invoking-methods-using-runtime-information"><a class="header" href="#invoking-methods-using-runtime-information">Invoking methods using runtime information</a></h2>
-<p>An RPC method can be invoked passing its name an parameter types at runtime. The parameter must be passed as a <code>JsonNode</code> or <code>RequestParamsTx</code>. The <code>RpcConv</code> defined in the flavors section is used in the following example:</p>
+<p>An RPC method can be invoked passing its name an parameter types at runtime. The parameter must be passed as a <code>JsonNode</code> or <code>RequestParamsTx</code>. The <code>RpcConv</code> defined in the <a href="./format_conversion.html">flavors section</a> is used in the following example:</p>
 <pre><code class="language-nim">let resp2 = await client.call("hello", %* ["Daisy"], RpcConv)
 </code></pre>
 <p>Using named parameters is allowed. Some server implementations may support only positional parameters, <code>json_rpc</code> supports both styles:</p>
