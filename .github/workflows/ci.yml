@@ -13,5 +13,6 @@ jobs:
       nim-versions: '["version-2-0", "version-2-2", "devel"]'
       test-command: |
         nimble setup -l
+        env ASAN_OPTIONS=detect_leaks=0 nimble test_asan
         nimble test
         nimble examples

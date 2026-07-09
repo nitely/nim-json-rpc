@@ -18,8 +18,8 @@ proc serverThread(chan: RpcChannelPtrs) {.thread.} =
   var srv = RpcChannelServer.new(chan)
   setupServer(srv)
   srv.start()
-  waitFor sleepAsync(1000.seconds)
-  #waitFor srv.closeWait()
+  waitFor sleepAsync(1.seconds)
+  waitFor srv.closeWait()
 
 suite "Thread channel RPC":
   asyncTest "Successful RPC call":
@@ -33,3 +33,5 @@ suite "Thread channel RPC":
     let r = waitFor client.call("myProc", %[%"abc", %[1, 2, 3, 4]])
     check r.string == "\"Hello abc data: [1, 2, 3, 4]\""
     waitFor client.close()
+    joinThread(server)
+    chan.close()
