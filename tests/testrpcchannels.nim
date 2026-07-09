@@ -32,3 +32,4 @@ suite "Thread channel RPC":
     waitFor client.connect()
     let r = waitFor client.call("myProc", %[%"abc", %[1, 2, 3, 4]])
     check r.string == "\"Hello abc data: [1, 2, 3, 4]\""
+    waitFor client.close()
