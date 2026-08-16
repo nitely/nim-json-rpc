@@ -108,6 +108,16 @@ template callTests(client: untyped) =
       checked += int(r.read().string == "\"Hello " & $i & " data: [1, 2, 3, 4]\"")
     check calls.len == checked
 
+  test "Concurrent RPC calls":
+    var calls = newSeq[Future[JsonString]]()
+    for i in 0 ..< 50_000:
+      calls.add client.call("myProc", %[% $i, %[1, 2, 3, 4]])
+    waitFor allFutures(calls)
+    var checked = 0
+    for i, r in calls.pairs():
+      checked += int(r.read().string == "\"Hello " & $i & " data: [1, 2, 3, 4]\"")
+    check calls.len == checked
+
 suite "Socket Server/Client RPC/newLine":
   setup:
     const framing = Framing.newLine()
