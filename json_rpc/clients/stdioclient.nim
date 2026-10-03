@@ -94,6 +94,10 @@ proc connect*(
     environment: StringTableRef = nil,
     options: set[AsyncProcessOption] = {},
 ) {.async: (raises: [CancelledError, JsonRpcError]).} =
+  if client.process != nil:
+    raise (ref RpcTransportError)(
+      msg: "The client is already connected to a peer, close it first"
+    )
   client.peerExitCode = Opt.none(int)
   let (ourStdin, theirStdin) = peerStdinPipe()
 

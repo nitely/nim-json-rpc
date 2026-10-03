@@ -320,6 +320,18 @@ suite "stdio transport errors":
 
     waitUntil(not process.running().valueOr(false))
 
+  test "connecting again without closing fails":
+    var client = newRpcStdioClient()
+    waitFor client.connect(peerExe(), @["http"])
+    let process = client.process
+    expect(JsonRpcError):
+      waitFor client.connect(peerExe(), @["http"])
+    # The first peer is still the one being served
+    check client.process == process
+    check (waitFor client.call("hello", %[%"still"])).string == "\"Hello still\""
+    waitFor client.close()
+    check client.exitCode() == Opt.some(0)
+
   test "reconnecting clears the previous peer's exit code":
     var client = newRpcStdioClient()
     waitFor client.connect(peerExe(), @["http"])
