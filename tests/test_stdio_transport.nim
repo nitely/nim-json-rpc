@@ -332,6 +332,16 @@ suite "stdio transport errors":
     waitFor client.close()
     check client.exitCode() == Opt.some(0)
 
+  test "connecting to two peers at the same time fails":
+    var client = newRpcStdioClient()
+    let first = client.connect(peerExe(), @["http"])
+    expect(JsonRpcError):
+      waitFor client.connect(peerExe(), @["http"])
+    waitFor first
+    check (waitFor client.call("hello", %[%"first"])).string == "\"Hello first\""
+    waitFor client.close()
+    check client.exitCode() == Opt.some(0)
+
   test "connecting after a failed connect works":
     var client = newRpcStdioClient()
     expect(JsonRpcError):
