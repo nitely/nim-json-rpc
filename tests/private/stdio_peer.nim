@@ -74,8 +74,6 @@ when isMainModule:
         true
 
       proc echoBytes(payload: string): string =
-        # Echo the payload back, so a burst of these puts the same volume in
-        # flight in both directions at once.
         payload
 
       proc flood(count: int, size: int): int {.async: (raises: [CancelledError]).} =
