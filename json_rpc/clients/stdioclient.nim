@@ -127,6 +127,8 @@ proc connect*(
   client.loop = client.attach(process.stdoutStream.tsource, ourStdin, command)
 
 method close*(client: RpcStdioClient) {.async: (raises: []).} =
+  ## Closes the peer's standard input and waits for the peer to exit, which
+  ## may take forever. Cancel it (ex: with `withTimeout`) to kill the peer.
   await procCall RpcPipesClient(client).close()
 
   if client.process != nil:
