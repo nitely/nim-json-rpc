@@ -19,7 +19,6 @@ import
   chronicles,
   ../../json_rpc/[rpcclient, rpcserver],
   ../../json_rpc/servers/stdioserver,
-  ../../json_rpc/private/shared_wrapper,
   ./[helpers, stdio_framing]
 
 when isMainModule:
@@ -83,10 +82,11 @@ when isMainModule:
         # Push `count` unsolicited notifications at the peer without waiting for
         # it to read any of them: the server's writes have to survive a stdout
         # pipe that the client is not draining yet.
-        let chunk = repeat('x', size)
+        let payload = JsonString($(%repeat('x', size)))
         for i in 0 ..< count:
           await srv.notify(
-            "client/flood", paramsTx(%*{"i": i, "payload": chunk}, JrpcConv)
+            "client/flood",
+            RequestParamsTx(kind: rpPositional, positional: @[JsonString($i), payload]),
           )
         count
 
