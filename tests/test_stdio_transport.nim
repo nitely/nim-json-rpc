@@ -332,6 +332,15 @@ suite "stdio transport errors":
     waitFor client.close()
     check client.exitCode() == Opt.some(0)
 
+  test "connecting after a failed connect works":
+    var client = newRpcStdioClient()
+    expect(JsonRpcError):
+      waitFor client.connect("no-such-binary-here", @[])
+    waitFor client.connect(peerExe(), @["http"])
+    check (waitFor client.call("hello", %[%"retry"])).string == "\"Hello retry\""
+    waitFor client.close()
+    check client.exitCode() == Opt.some(0)
+
   test "reconnecting clears the previous peer's exit code":
     var client = newRpcStdioClient()
     waitFor client.connect(peerExe(), @["http"])
