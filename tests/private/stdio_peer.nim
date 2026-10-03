@@ -69,7 +69,9 @@ when isMainModule:
         # handles one message at a time (the socket transport behaves the same
         # way): awaiting the peer's answer inside a handler would deadlock, since
         # that answer can only be read once the handler has returned.
-        asyncSpawn askClientAsync(srv.connection, question)
+        doAssert srv.connections.len == 1
+        for conn in srv.connections:
+          asyncSpawn askClientAsync(conn, question)
         true
 
       proc echoBytes(payload: string): string =

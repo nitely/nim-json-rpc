@@ -67,7 +67,7 @@ proc newRpcStdioServer*(
   RpcStdioServer.new(maxMessageSize, framing)
 
 proc newRpcStdioServer*(
-    processClientHook: RpcProcessClient,
+    processClientHook: RpcPipesProcessClient,
     maxMessageSize = defaultMaxMessageSize,
     framing = Framing.httpHeader(),
 ): RpcStdioServer =
