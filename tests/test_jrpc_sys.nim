@@ -261,3 +261,27 @@ suite "jrpc_sys serialization":
       check:
         rx.kind == ResponseKind.rkResult
         rx.result == JsonString("\"ok\"")
+
+  test "bidi request with invalid params is rejected as a request":
+    # the error carries the request id so the reply can reach the caller
+    try:
+      discard JrpcSys.decode(
+        """{"jsonrpc":"2.0","params":null,"method":"m","id":2}""", BidiMessage
+      )
+      fail()
+    except BidiMessageRequestError as exc:
+      check exc.id == RequestId(kind: riNumber, num: 2)
+    # a notification has no id to carry
+    try:
+      discard JrpcSys.decode("""{"jsonrpc":"2.0","method":"m","params":7}""", BidiMessage)
+      fail()
+    except BidiMessageRequestError as exc:
+      check exc.id == RequestId(kind: riNull)
+    # a batch is answered as a whole, so no single id is carried
+    try:
+      discard JrpcSys.decode(
+        """[{"jsonrpc":"2.0","method":"m","params":null,"id":3}]""", BidiMessage
+      )
+      fail()
+    except BidiMessageRequestError as exc:
+      check exc.id == RequestId(kind: riNull)

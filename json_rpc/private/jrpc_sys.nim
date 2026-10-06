@@ -149,6 +149,7 @@ type
     jsonrpc : results.Opt[JsonRPC2]
     `method`: results.Opt[string]
     params  : RequestParamsRx  # XXX this is isFieldExpected = false
+    invalidParams: results.Opt[JsonValueKind]
     result  : results.Opt[JsonString]
     error   : results.Opt[ResponseError]
     id      : results.Opt[RequestId]
@@ -166,6 +167,7 @@ type
 
   InvalidRequestSysError* = object of UnexpectedValueError
   BidiMessageRequestError* = object of SerializationError
+    id*: RequestId
   BidiMessageResponseError* = object of SerializationError
 
 # don't mix the json-rpc system encoding with the
@@ -382,14 +384,27 @@ proc readValue(r: var JsonReader[JrpcSys], val: var BidiMessageIx)
     of "result" : val.result.ok r.parseAsString()
     of "error"  : r.readValue(val.error)
     of "method" : r.readValue(val.`method`)
-    of "params" : r.readValue(val.params)
+    of "params" :
+      let tok = r.tokKind
+      if tok in {JsonValueKind.Array, JsonValueKind.Object}:
+        r.readValue(val.params)
+      else:
+        val.invalidParams.ok tok
+        r.skipSingleJsValue()
     else: r.skipSingleJsValue()
 
-proc validateRequest(val: BidiMessageIx) {.gcsafe, raises: [BidiMessageRequestError].} =
+proc validateRequest(
+    val: BidiMessageIx, id = default(RequestId)
+) {.gcsafe, raises: [BidiMessageRequestError].} =
   if val.jsonrpc.isNone:
-    raise (ref BidiMessageRequestError)(msg: "Missing `jsonrpc` field")
+    raise (ref BidiMessageRequestError)(msg: "Missing `jsonrpc` field", id: id)
   if val.`method`.isNone:
-    raise (ref BidiMessageRequestError)(msg: "Missing `method` field")
+    raise (ref BidiMessageRequestError)(msg: "Missing `method` field", id: id)
+  if val.invalidParams.isSome:
+    raise (ref BidiMessageRequestError)(
+      msg: "RequestParam must be either array or object, got=" & $val.invalidParams[],
+      id: id,
+    )
 
 proc validateResponse(val: BidiMessageIx) {.gcsafe, raises: [BidiMessageResponseError].} =
   if val.jsonrpc.isNone:
@@ -440,7 +455,7 @@ proc readValue*(r: var JsonReader[JrpcSys], val: var BidiMessage)
     var m: BidiMessageIx
     r.readValue(m)
     val = if m.`method`.isSome:
-      validateRequest(m)
+      validateRequest(m, m.id.get(default(RequestId)))
       var req = RequestRx2(
         jsonrpc: move(m.jsonrpc[]), `method`: move(m.`method`[]), params: move(m.params), id: move(m.id)
       )

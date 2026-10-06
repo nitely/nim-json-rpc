@@ -110,6 +110,19 @@ template allTests(client: untyped) =
     let r1 = waitFor client.rets("foobar")
     check r1 == "ret foobar"
 
+  test "Sending a request with null params won't terminate the connection":
+    const req = """{"jsonrpc": "2.0", "method": "rets", "params": null, "id": 123123}"""
+    waitFor client.send(req.toBytes)
+    # following requests still work
+    let r1 = waitFor client.rets("foobar")
+    check r1 == "ret foobar"
+
+  test "Sending a notification with null params terminates the connection":
+    # note this terminates the connection when receiving the null id response
+    const req = """{"jsonrpc": "2.0", "method": "rets", "params": null}"""
+    const expected = """{"code":-32600,"message":"RequestParam must be either array or object, got=Null"}"""
+    checkInvalidRequest(client, req, expected)
+
   test "Sending an ambiguous message terminates the connection":
     # check it fails with an invalid request error; id=null response
     const req = """{"foo": "boo"}"""

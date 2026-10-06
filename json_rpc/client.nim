@@ -192,7 +192,7 @@ proc processMessage*(
     return makeResponse(default(seq[byte]))
   except BidiMessageRequestError as exc:
     debug "Failed to parse request", err = exc.msg, remote = client.remote
-    return makeResponse(wrapError(router.INVALID_REQUEST, exc.msg))
+    return makeResponse(wrapError(router.INVALID_REQUEST, exc.msg, exc.id))
   except SerializationError as exc:
     debug "Failed to parse message", err = exc.msg, remote = client.remote
     raise (ref JsonRpcError)(msg: exc.msg, parent: exc)

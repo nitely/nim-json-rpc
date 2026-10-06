@@ -94,10 +94,10 @@ func lookup(router: RpcRouter, req: RequestRx2): Opt[RpcProc] =
   else:
     ok(rpcProc)
 
-func wrapError*(code: int, msg: string): seq[byte] =
+func wrapError*(code: int, msg: string, id = default(RequestId)): seq[byte] =
   JrpcSys.withWriter(writer):
     writer.writeValue(
-      ResponseTx(kind: rkError, error: ResponseError(code: code, message: msg))
+      ResponseTx(kind: rkError, error: ResponseError(code: code, message: msg), id: id)
     )
 
 # ------------------------------------------------------------------------------
